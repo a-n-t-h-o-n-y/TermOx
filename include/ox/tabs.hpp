@@ -1,3 +1,6 @@
+/** @file
+ * Labeled tab strips and selected-page layout.
+ */
 #pragma once
 #include <cmath>
 #include <ox/container.hpp>
@@ -10,17 +13,30 @@ template <LayoutContainer Container>
 class Tabs : public Widget {
    public:
     using Widget::handle;
+    /** Child page container, owned or borrowed according to its element types. */
     Stack<Container> pages;
+    /** Base drawing style; explicit colors take precedence over theme defaults. */
     Style style = {};
+    /** Style patch for selected content; explicit patches override themed selection
+     * defaults.
+     */
     StylePatch selected_style = {.background = {},
                                  .foreground = {},
                                  .enabled = Trait::Inverse,
                                  .disabled = {}};
+    /** Style patch for choices that are not selected. */
     StylePatch unselected_style = {};
+    /** Style patch for the control's selection or state indicator. */
     StylePatch indicator_style = {};
+    /** Style patch for the separator beneath the tab strip. */
     StylePatch track_style = {};
+    /** Draw a separator between tab labels and the selected page. */
     bool show_separator = true;
+    /** Emits the optional newly selected page index only on selection change. */
     sl::Signal<void(std::optional<std::size_t>)> on_select;
+    /** Retain pages and equally many printable labels; default selection is the first
+     * page when present.
+     */
     Tabs(Container children, std::vector<std::string> labels)
         : Widget{FocusPolicy::Strong}, pages{std::move(children)}
     {
@@ -30,7 +46,11 @@ class Tabs : public Widget {
                        tabs.on_select(index);
                    }}(*this);
     }
+    /** Borrow tab labels until set_labels(). */
     auto labels() const -> std::span<std::string const> { return labels_; }
+    /** Validate label count against pages, replace labels, and request layout/repaint;
+     * invalid counts or text throw.
+     */
     void set_labels(std::vector<std::string> labels)
     {
         std::size_t count = 0;
@@ -44,8 +64,12 @@ class Tabs : public Widget {
         labels_ = std::move(labels);
         refresh();
     }
+    /** Return the selected page index from the embedded Stack. */
     auto selected_index() const -> std::optional<std::size_t>
     { return pages.selected_index(); }
+    /** Select a valid page or nullopt through the embedded Stack, then update tab
+     * presentation; invalid indices throw.
+     */
     auto select(std::optional<std::size_t> index) -> bool
     {
         auto snapshot = widget_tree(pages);
@@ -234,6 +258,7 @@ class Tabs : public Widget {
         return n;
     }
 };
+/** Deduce tab page storage from the supplied container and label vector. */
 template <LayoutContainer Container>
 Tabs(Container, std::vector<std::string>) -> Tabs<Container>;
 }  // namespace ox

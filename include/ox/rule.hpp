@@ -1,3 +1,6 @@
+/** @file
+ * Horizontal and vertical separator widgets.
+ */
 #pragma once
 #include <ox/core/canvas.hpp>
 namespace ox {

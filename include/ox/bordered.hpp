@@ -1,3 +1,6 @@
+/** @file
+ * Border outlines, titles, and child decoration.
+ */
 #pragma once
 
 #include <algorithm>
@@ -11,9 +14,15 @@
 
 namespace ox {
 
+/** One-cell outline and optional title applied around a child without owning that child
+ * itself.
+ */
 struct Border {
+    /** Corner and wall glyphs used to draw the border outline. */
     shape::Box box = shape::Box::square();
+    /** Base drawing style; explicit colors take precedence over theme defaults. */
     Style style = {};  // Only applies to box.
+    /** Optional border/divider title with its own alignment and style. */
     Label::Options label = {};
 };
 
@@ -29,15 +38,23 @@ template <WidgetDerived ChildWidget>
 class Bordered : public Widget {
    public:
     using Widget::handle;
+    /** Construction-time values; field initializers below define the defaults. */
     struct Options {
+        /** Owned wrapped widget, arranged inside the border's one-cell inset. */
         ChildWidget child = {};
+        /** Border shape, drawing style, and title configuration. */
         Border border = {};
     };
 
    public:
+    /** Owned wrapped widget, arranged inside the border's one-cell inset. */
     ChildWidget child;
+    /** Border shape, drawing style, and title configuration. */
     Border border;
 
+    /** Own a wrapped child and border configuration; arrange the child inside a clipped
+     * one-cell inset.
+     */
     Bordered(Options x)
         : Widget{FocusPolicy::None, SizePolicy::flex()},
           child{std::move(x.child)},
@@ -72,6 +89,7 @@ class Bordered : public Widget {
 };
 
 // Moves \p w into a Bordered object
+/** Move a widget into an owning Bordered wrapper with the supplied outline and title. */
 template <WidgetDerived WidgetType>
 [[nodiscard]] auto operator|(WidgetType w, Border b) -> Bordered<WidgetType>
 { return {{.child = std::move(w), .border = std::move(b)}}; }
@@ -83,22 +101,35 @@ template <std::size_t I, WidgetDerived WidgetType>
 auto get_child(Bordered<WidgetType>& bordered) -> auto&
 { return get_child<I>(bordered.child); }
 
+/** Borrow the Ith child of the wrapped layout read-only. */
 template <std::size_t I, WidgetDerived WidgetType>
 auto get_child(Bordered<WidgetType> const& bordered) -> auto const&
 { return get_child<I>(bordered.child); }
 
 // -------------------------------------------------------------------------------------
 
+/** Matching vertical and horizontal divider glyphs; presets preserve consistent stroke
+ * weight.
+ */
 struct Lines {
+    /** Scalar used for a vertical divider stroke. */
     char32_t vertical;
+    /** Scalar used for a horizontal divider stroke. */
     char32_t horizontal;
 
+    /** Thin single-line box-drawing strokes. */
     [[nodiscard]] static constexpr auto light() -> Lines { return {U'│', U'─'}; }
+    /** Heavy box-drawing strokes. */
     [[nodiscard]] static constexpr auto bold() -> Lines { return {U'┃', U'━'}; }
+    /** Double-line box-drawing strokes. */
     [[nodiscard]] static constexpr auto twin() -> Lines { return {U'║', U'═'}; }
+    /** Dashed single-line strokes. */
     [[nodiscard]] static constexpr auto dashed() -> Lines { return {U'╎', U'╌'}; }
+    /** Dotted single-line strokes. */
     [[nodiscard]] static constexpr auto dotted() -> Lines { return {U'┆', U'┄'}; }
+    /** ASCII vertical bar and hyphen strokes. */
     [[nodiscard]] static constexpr auto ascii() -> Lines { return {U'|', U'-'}; }
+    /** Space strokes for a divider with no visible line. */
     [[nodiscard]] static constexpr auto empty() -> Lines { return {U' ', U' '}; }
 };
 
@@ -114,19 +145,31 @@ class Divider : public Widget {
    public:
     using Widget::handle;
 
+    /** Construction-time values; field initializers below define the defaults. */
     struct Options {
+        /** Draw a vertical divider when true; horizontal is the default. */
         bool vertical = false;
+        /** Divider stroke glyphs; choose a Lines factory for a consistent pair. */
         Lines lines = Lines::light();
+        /** Base drawing style; explicit colors take precedence over theme defaults. */
         Style style = {};
+        /** Optional border/divider title with its own alignment and style. */
         Label::Options label = {};
-    } static const init;
+    } static const init; ///< Default options used when no explicit configuration is supplied.
 
    public:
+    /** Draw a vertical divider when true; horizontal is the default. */
     bool vertical;
+    /** Divider stroke glyphs; choose a Lines factory for a consistent pair. */
     Lines lines;
+    /** Base drawing style; explicit colors take precedence over theme defaults. */
     Style style;
+    /** Optional border/divider title with its own alignment and style. */
     Label::Options label;
 
+    /** Configure stroke orientation and label; choose size policies to reserve the
+     * intended separator area.
+     */
     Divider(Options x = init);
 
    public:

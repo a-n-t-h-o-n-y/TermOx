@@ -1,3 +1,6 @@
+/** @file
+ * Typed numeric drafts, formatting, validation, and commit.
+ */
 #pragma once
 #include <cmath>
 #include <format>
@@ -15,22 +18,41 @@ template <Numeric T>
 class BasicNumericEdit : public Widget {
    public:
     using Widget::handle;
+    /** Scalar type of the committed value and on_change signal. */
     using value_type = T;
+    /** Typed inclusive bounds and keyboard step; integral values never round-trip
+     * through floating point.
+     */
     using Range = BasicValueRange<T>;
+    /** Construction-time values; field initializers below define the defaults. */
     struct Options {
+        /** Finite numeric bounds and positive step used to clamp and edit the value. */
         Range range = {};
+        /** Initial typed value, clamped to its typed bounds. */
         T value = 0;
+        /** std::format-compatible numeric format string; invalid formats can throw when
+         * formatting is evaluated.
+         */
         std::string format = "{}";
+        /** Display text preceding the formatted number. */
         std::string prefix = {};
+        /** Display text following the formatted number. */
         std::string suffix = {};
+        /** Locale used for numeric formatting and parsing where supported. */
         std::locale locale = std::locale::classic();
+        /** Attempt to parse and commit the draft when editing focus leaves. */
         bool commit_on_focus_loss = false;
+        /** Initial configuration for the owned numeric draft editor. */
         LineEdit::Options editor = {};
     };
     /** LineEdit with focus notifications, used to switch display/edit presentation. */
     class Editor : public LineEdit {
        public:
+        /** Create a line editor with focus notifications for numeric draft presentation. */
         explicit Editor(LineEdit::Options x) : LineEdit{std::move(x)} {}
+        /** Emits true on focus entry and false after focus loss, allowing draft commit
+         * or presentation refresh.
+         */
         sl::Signal<void(bool)> on_focus;
         auto focus_in() -> EventResponse override
         {
@@ -45,16 +67,32 @@ class BasicNumericEdit : public Widget {
             return result;
         }
     };
+    /** Owned draft editor; call commit() to parse its current text into the typed value. */
     Editor editor;
+    /** std::format-compatible numeric format string; invalid formats can throw when
+     * formatting is evaluated.
+     */
     std::string format;
+    /** Display text preceding the formatted number. */
     std::string prefix;
+    /** Display text following the formatted number. */
     std::string suffix;
+    /** Locale used for numeric formatting and parsing where supported. */
     std::locale locale;
+    /** Attempt to parse and commit the draft when editing focus leaves. */
     bool commit_on_focus_loss;
+    /** Emits the new typed committed value only when it changes. */
     sl::Signal<void(T)> on_change;
+    /** Emits the rejected draft text when commit() cannot parse or validate a complete
+     * value.
+     */
     sl::Signal<void(std::string const&)> on_invalid;
 
+    /** Create the typed default value and range using default numeric presentation. */
     BasicNumericEdit() : BasicNumericEdit{Options{}} {}
+    /** Validate typed range and initial value, format the committed value, and connect
+     * draft and focus callbacks.
+     */
     explicit BasicNumericEdit(Options x)
         : Widget{FocusPolicy::None, SizePolicy::flex(), SizePolicy::fixed(1)},
           editor{std::move(x.editor)},
@@ -95,9 +133,17 @@ class BasicNumericEdit : public Widget {
                                                      : EventResponse{};
         };
     }
+    /** Return typed bounds and stepping policy by value. */
     auto range() const -> Range { return range_; }
+    /** Return the committed typed value; incomplete or invalid draft text does not
+     * change it.
+     */
     auto value() const -> T { return value_; }
+    /** Return whether editor text represents an uncommitted draft. */
     auto has_draft() const -> bool { return draft_; }
+    /** Clamp a valid typed value, prepare its formatting, discard any draft, and emit on_change only when the value changes.
+     * Nonfinite floating-point values and invalid formats throw before replacing the committed value.
+     */
     auto set_value(T v) -> bool
     {
         v = checked_value(v, range_);
@@ -110,6 +156,9 @@ class BasicNumericEdit : public Widget {
             self->on_change(v);
         return changed;
     }
+    /** Validate and assign typed bounds, re-clamp/reformat the committed value, and emit
+     * only if its value changes; return whether range changed.
+     */
     auto set_range(Range r) -> bool
     {
         check_range(r);
@@ -120,6 +169,9 @@ class BasicNumericEdit : public Widget {
     }
     /** Returns validity, including an unchanged value; invalid input stays visible. */
     auto commit() -> bool { return commit_draft(true); }
+    /** Discard the draft and redisplay the committed value without emitting a numeric
+     * value change.
+     */
     void revert() { sync(); }
     void refresh() override
     {
@@ -303,6 +355,8 @@ class BasicNumericEdit : public Widget {
         return {left, std::clamp(right, 0, a.width - left)};
     }
 };
+/** Double-precision numeric editor. */
 using NumericEdit = BasicNumericEdit<double>;
+/** Integer numeric editor with precision-preserving bounds, parsing, and stepping. */
 using IntegerEdit = BasicNumericEdit<int>;
 }  // namespace ox

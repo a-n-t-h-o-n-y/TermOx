@@ -1,3 +1,6 @@
+/** @file
+ * Styled, aligned, wrapped UTF-8 labels.
+ */
 #pragma once
 
 #include <cstdint>
@@ -20,6 +23,9 @@ void put_label(Canvas c,
                Align align,
                Style style,
                bool vertical = false);
+/** Draw an aligned label with inherited clipping, preserving complete graphemes and
+ * leaving surrounding cells untouched.
+ */
 void paint_label(Canvas c, std::string_view text, Align align, Style style,
                  bool vertical = false);
 /** Natural extent of printable, single-line text, using reusable Unicode analysis. */
@@ -37,32 +43,56 @@ class Label : public Widget {
    public:
     using Widget::handle;
 
+    /** Construction-time values; field initializers below define the defaults. */
     struct Options {
+        /** Owned printable label text; use set_text() to invalidate measurement and repaint. */
         std::string text = "";
+        /** Stack graphemes vertically when true; use set_vertical() to update axis policies. */
         bool vertical = false;
+        /** Text alignment along its display direction. */
         Align align = Align::Center;
+        /** Base drawing style; explicit colors take precedence over theme defaults. */
         Style style = {};
+        /** Semantic theme role used when drawing colors are unspecified. */
         Surface role = Surface::Canvas;
+        /** Horizontal size bounds and growth weight. */
         SizePolicy width_policy = vertical ? SizePolicy{.minimum = 1, .flexibility = 0}
                                            : SizePolicy::flex();
+        /** Vertical size bounds and growth weight. */
         SizePolicy height_policy = vertical ? SizePolicy::flex() : SizePolicy::fixed(1);
-    } static const init;
+    } static const init; ///< Default options used when no explicit configuration is supplied.
 
    public:
+    /** Owned printable label text; use set_text() to invalidate measurement and repaint. */
     std::string text;
+    /** Stack graphemes vertically when true; use set_vertical() to update axis policies. */
     bool vertical;
+    /** Text alignment along its display direction. */
     Align align;
+    /** Base drawing style; explicit colors take precedence over theme defaults. */
     Style style;
+    /** Semantic theme role used when drawing colors are unspecified. */
     Surface role;
 
+    /** Create printable label text and its axis policies; validate text during
+     * measurement/painting.
+     */
     Label(Options x = init);
 
+    /** Own UTF-8 text with the default horizontal label options. */
     Label(std::string text_);
 
+    /** Copy null-terminated UTF-8 text with default horizontal options. */
     Label(char const* text_);
 
    public:
+    /** Replace text and request layout/repaint only when it changes; return whether it
+     * changed.
+     */
     auto set_text(std::string value) -> bool;
+    /** Change text direction, update default direction-dependent size policies, and
+     * request layout/repaint if changed.
+     */
     auto set_vertical(bool value) -> bool;
     void refresh() override;
     auto measure(Area, esc::WidthPolicy = {}) const -> Area override;
@@ -96,29 +126,59 @@ class BasicNumberLabel : public Widget {
    public:
     using Widget::handle;
 
+    /** Construction-time values; field initializers below define the defaults. */
     struct Options {
+        /** Numeric value formatted for display; set_value() requests layout and repaint
+         * on change.
+         */
         NumberType value = 0;
+        /** Text alignment along its display direction. */
         Align align = Align::Center;
+        /** Base drawing style; explicit colors take precedence over theme defaults. */
         Style style = {};
+        /** Semantic theme role used when drawing colors are unspecified. */
         Surface role = Surface::Canvas;
+        /** Locale used for numeric formatting and parsing where supported. */
         std::locale locale = std::locale{};
+        /** std::format-compatible numeric format string; invalid formats can throw when
+         * formatting is evaluated.
+         */
         std::string format = "{}";
+        /** Display text preceding the formatted number. */
         std::string prefix = {};
+        /** Display text following the formatted number. */
         std::string suffix = {};
+        /** Horizontal size bounds and growth weight. */
         SizePolicy width_policy = SizePolicy::flex();
+        /** Vertical size bounds and growth weight. */
         SizePolicy height_policy = SizePolicy::fixed(1);
-    } inline static const init = {};
+    } inline static const init = {}; ///< Default options used when no explicit configuration is supplied.
 
    public:
+    /** Numeric value formatted for display; set_value() requests layout and repaint on
+     * change.
+     */
     NumberType value;
+    /** Text alignment along its display direction. */
     Align align;
+    /** Base drawing style; explicit colors take precedence over theme defaults. */
     Style style;
+    /** Semantic theme role used when drawing colors are unspecified. */
     Surface role;
+    /** Locale used for numeric formatting and parsing where supported. */
     std::locale locale;
+    /** std::format-compatible numeric format string; invalid formats can throw when
+     * formatting is evaluated.
+     */
     std::string format;
+    /** Display text preceding the formatted number. */
     std::string prefix;
+    /** Display text following the formatted number. */
     std::string suffix;
 
+    /** Own the numeric value and formatting configuration; formatting is evaluated by
+     * measure() and paint().
+     */
     BasicNumberLabel(Options x = init)
         : Widget{FocusPolicy::None, x.width_policy, x.height_policy},
           value{std::move(x.value)},
@@ -132,6 +192,9 @@ class BasicNumberLabel : public Widget {
     {}
 
    public:
+    /** Store a changed value and request layout/repaint; formatting errors surface at
+     * measurement or painting.
+     */
     auto set_value(NumberType next) -> bool
     {
         if (value == next) { return false; }
@@ -154,7 +217,9 @@ class BasicNumberLabel : public Widget {
     }
 };
 
+/** Numeric label storing and formatting an int. */
 using IntegerLabel = BasicNumberLabel<int>;
+/** Numeric label storing and formatting a float. */
 using FloatLabel = BasicNumberLabel<float>;
 
 }  // namespace ox

@@ -1,3 +1,6 @@
+/** @file
+ * Axis size policies, space allocation, and cross-axis placement.
+ */
 #pragma once
 
 #include <array>
@@ -12,11 +15,18 @@ namespace ox {
 
 /** Bounds and relative growth weight along one layout axis. */
 struct SizePolicy {
+    /** Smallest requested allocation in cells; nonnegative. */
     int minimum = 0;
+    /** Largest allocation in cells; must be at least minimum. */
     int maximum = std::numeric_limits<int>::max();
+    /** Finite nonnegative share of surplus space; zero does not grow beyond the minimum. */
     float flexibility = 1.f;
+    /** Compare bounds and growth weight exactly. */
     auto operator==(SizePolicy const&) const -> bool = default;
 
+    /** Request exactly size cells on an axis; the allocator may shrink it when all
+     * minimums cannot fit.
+     */
     [[nodiscard]] static constexpr auto fixed(int size) -> SizePolicy
     {
         return {
@@ -26,6 +36,7 @@ struct SizePolicy {
         };
     }
 
+    /** Allow unbounded growth with the supplied finite nonnegative weight. */
     [[nodiscard]] static constexpr auto flex(float flex = 1.f) -> SizePolicy
     {
         return {
@@ -35,6 +46,9 @@ struct SizePolicy {
         };
     }
 
+    /** Allow growth between min and max cells with unit weight; allocation validates the
+     * bounds.
+     */
     [[nodiscard]] static constexpr auto bounded(int min, int max) -> SizePolicy
     {
         return {
@@ -44,6 +58,7 @@ struct SizePolicy {
         };
     }
 
+    /** Request at least min cells with unbounded unit-weight growth. */
     [[nodiscard]] static constexpr auto min(int min) -> SizePolicy
     {
         return {
@@ -53,6 +68,7 @@ struct SizePolicy {
         };
     }
 
+    /** Allow unit-weight growth from zero up to max cells. */
     [[nodiscard]] static constexpr auto max(int max) -> SizePolicy
     {
         return {
@@ -70,7 +86,15 @@ struct SizePolicy {
 [[nodiscard]] auto distribute_length(std::span<SizePolicy const> policies,
                                      int available) -> std::vector<int>;
 
-enum class CrossAlign : std::uint8_t { Stretch, Start, Center, End };
+/** Child placement across the layout's main axis: fill, leading edge, center, or
+ * trailing edge.
+ */
+enum class CrossAlign : std::uint8_t {
+    Stretch, ///< Use the available cross-axis extent, constrained by the child policy.
+    Start, ///< Place the child at the cross-axis beginning.
+    Center, ///< Center the child on the cross axis.
+    End ///< Place the child at the cross-axis end.
+};
 /** Clamp a natural extent against an axis policy and available space. */
 [[nodiscard]] auto fit_length(int natural,
                               SizePolicy policy,
@@ -83,6 +107,9 @@ enum class CrossAlign : std::uint8_t { Stretch, Start, Center, End };
 [[nodiscard]] auto layout_row(std::span<SizePolicy const> policies,
                               Area available,
                               int gap = 0) -> std::vector<Rect>;
+/** Allocate vertical child extents with gaps; children fill the cross axis. Invalid
+ * policies or negative gaps throw.
+ */
 [[nodiscard]] auto layout_column(std::span<SizePolicy const> policies,
                                  Area available,
                                  int gap = 0) -> std::vector<Rect>;

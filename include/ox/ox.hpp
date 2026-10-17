@@ -1,3 +1,12 @@
+/** @file
+ * Public widget, layout, drawing, and application interfaces.
+ */
+/** @namespace ox
+ * Widgets, layout, text editing, drawing, and application dispatch.
+ * Unless explicitly marked thread-safe, use widgets and their signals on the
+ * application thread. Widget methods that mutate retained state schedule their
+ * documented effects; direct configuration changes usually require refresh().
+ */
 #pragma once
 
 #include <signals_light/signal.hpp>

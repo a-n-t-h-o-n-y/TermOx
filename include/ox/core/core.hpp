@@ -1,3 +1,6 @@
+/** @file
+ * Terminal-independent drawing and event APIs collected in one include.
+ */
 #pragma once
 
 #include <ox/core/canvas.hpp>

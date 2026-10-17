@@ -1,3 +1,6 @@
+/** @file
+ * Widget lifecycle, geometry, effects, and tracked connections.
+ */
 #pragma once
 
 #include <concepts>
@@ -30,6 +33,9 @@ class Application;
 struct Clipboard;
 template <typename T>
 class LifetimeView;
+/** Borrow typed widget identity; the view follows moves and expires on destruction or
+ * incompatible slicing.
+ */
 template <typename T>
 auto track(T&) -> LifetimeView<T>;
 
@@ -42,78 +48,142 @@ auto track(T&) -> LifetimeView<T>;
  * Click: The widget can be focused by clicking on it.
  * Strong: The widget can be focused by either tab or click.
  */
-enum class FocusPolicy : std::uint8_t { None, Tab, Click, Strong };
+enum class FocusPolicy : std::uint8_t {
+    None, ///< Exclude from keyboard and pointer focus.
+    Tab, ///< Include in Tab traversal; pointer presses do not select focus.
+    Click, ///< Allow pointer focus; exclude from Tab traversal.
+    Strong ///< Allow both Tab traversal and pointer focus.
+};
 
 /**
  * Base class for interactive UI elements.
  */
 class Widget {
    public:
+    /** How this widget can acquire focus; changing it is observed during tree
+     * synchronization.
+     */
     FocusPolicy focus_policy;
+    /** Horizontal allocation bounds and flexibility; call refresh() after direct
+     * layout-policy changes.
+     */
     SizePolicy width_policy;
+    /** Vertical allocation bounds and flexibility; call refresh() after direct
+     * layout-policy changes.
+     */
     SizePolicy height_policy;
+    /** False hides this widget and its descendants from painting and input. */
     bool visible = true;
+    /** False excludes this subtree from input, focus, and widget-timer callbacks; it
+     * remains visible.
+     */
     bool enabled = true;
     /** Root-layer child: bounds are global and inherited parent clipping is bypassed.
      */
     bool overlay = false;
     /** While visible, input/focus are confined to this subtree. */
     bool modal = false;
+    /** Overlay stacking key; bring_to_front() raises an attached overlay without manual
+     * bookkeeping.
+     */
     std::size_t overlay_order = 0;
     /** Optional application-wide bindings. Current input/modal eligibility applies. */
     std::function<EventResponse(KeyEvent const&)> shortcuts = {};
+    /** Return effective input eligibility when attached, including disabled ancestors
+     * and modal restrictions.
+     */
     auto is_enabled() const -> bool
     { return enabled && (!application_ || input_enabled_); }
+    /** Patch applied by appearance() when this widget is effectively disabled. */
     StylePatch disabled_style = {.background = {},
                                  .foreground = {},
                                  .enabled = Trait::Dim,
                                  .disabled = {}};
+    /** Borrow the application theme, or a static plain theme while detached. */
     auto theme() const -> Theme const&;
+    /** Resolve semantic theme defaults, preserve explicit colors, then apply
+     * disabled_style if needed.
+     */
     auto appearance(Style normal, Surface role = Surface::Canvas) const -> Style
     {
         normal = theme_style(normal, theme(), role);
         return is_enabled() ? normal : normal | disabled_style;
     }
+    /** Resolve a themed selected style with the supplied explicit patch. */
     auto selection_appearance(Style normal, StylePatch const& patch) const -> Style
     { return theme_selection(normal, patch, theme()); }
 
+    /** Return parent-local geometry; overlay bounds are interpreted in screen coordinates. */
     [[nodiscard]] auto bounds() const -> Rect { return bounds_; }
+    /** Return bounds().at in the parent's coordinate system. */
     [[nodiscard]] auto at() const -> Point { return bounds_.at; }
+    /** Return the assigned terminal-cell extent, which may be zero in either dimension. */
     [[nodiscard]] auto size() const -> Area { return bounds_.size; }
+    /** Return the focus flag maintained by Focus; do not infer focus from its policy. */
     [[nodiscard]] auto is_focused() const -> bool { return focused_; }
 
    public:
+    /** Create an unattached, visible, enabled widget with the given focus and allocation
+     * policies.
+     */
     Widget(FocusPolicy fp = FocusPolicy::None,
            SizePolicy width = SizePolicy::flex(),
            SizePolicy height = SizePolicy::flex());
 
+    /** Widget identities cannot be copied. */
     Widget(Widget const&) = delete;
+    /** Transfer identity, attachments, timers, and animations so existing tracked
+     * references follow the move.
+     */
     Widget(Widget&& other);
 
+    /** Widget identities cannot be copy-assigned. */
     auto operator=(Widget const&) -> Widget& = delete;
+    /** Invalidate this identity and its work, then take other's identity and attached work. */
     auto operator=(Widget&& other) -> Widget&;
 
+    /** Expire lifetime views, stop attached timers, and detach animations without
+     * destroying child widgets.
+     */
     virtual ~Widget();
 
    public:
+    /** Handle a local-coordinate mouse press; the default leaves propagation and effects
+     * unchanged.
+     */
     virtual auto handle(MousePress const&) -> EventResponse { return {}; }
 
+    /** Handle a local-coordinate mouse release; capture can deliver it outside the
+     * widget bounds.
+     */
     virtual auto handle(MouseRelease const&) -> EventResponse { return {}; }
 
+    /** Handle local wheel input; return handled to stop ancestor propagation. */
     virtual auto handle(MouseWheel const&) -> EventResponse { return {}; }
 
+    /** Handle local pointer motion, including captured drags outside the widget bounds. */
     virtual auto handle(MouseMove const&) -> EventResponse { return {}; }
 
+    /** Notify entry into the hover ancestry; default has no effects. */
     virtual auto mouse_enter() -> EventResponse { return {}; }
 
+    /** Notify departure from the hover ancestry, including geometry or eligibility changes. */
     virtual auto mouse_leave() -> EventResponse { return {}; }
 
+    /** Notify acquisition of focus; return repaint if focus decoration changes. */
     virtual auto focus_in() -> EventResponse { return {}; }
 
+    /** Notify loss of focus; default has no effects. */
     virtual auto focus_out() -> EventResponse { return {}; }
 
+    /** Handle keyboard input from the focused ancestry; raw handlers return effects
+     * without applying them.
+     */
     virtual auto handle(KeyEvent const&) -> EventResponse { return {}; }
 
+    /** Handle a bounded paste-stream chunk; editors commit only complete accepted paste
+     * content.
+     */
     virtual auto handle(esc::PasteChunk const&) -> EventResponse { return {}; }
 
     /** Pure natural-size query. Measurement must not mutate the tree or emit signals.
@@ -123,9 +193,19 @@ class Widget {
         validate(available);
         return {};
     }
+    /** Paint behind this widget and its children, clipped to the inherited visible region. */
     virtual void paint_background(Canvas) {}
+    /** Paint local content and return an optional local caret; the application uses it
+     * only for the focused widget.
+     */
     virtual auto paint(Canvas) -> Cursor { return {}; }
+    /** Paint after children using the same inherited clip, for borders or other
+     * foreground decorations.
+     */
     virtual void paint_overlay(Canvas) {}
+    /** Request layout and repaint after direct public configuration changes; subclasses
+     * may rebuild cached data.
+     */
     virtual void refresh()
     {
         request_layout();
@@ -134,31 +214,62 @@ class Widget {
     /** Called after attachment and application theme changes. Do not emit model
      * changes. */
     virtual void theme_changed() {}
+    /** Cancel an armed pointer gesture when capture is lost; no release activation
+     * should follow.
+     */
     virtual auto pointer_cancel() -> EventResponse { return {}; }
+    /** Request explicit drag capture while attached and eligible; return false if
+     * capture is unavailable.
+     */
     auto capture_pointer(MouseButton button = MouseButton::Left) -> bool;
+    /** Release this widget's capture, if any; detached widgets do nothing. */
     void release_pointer();
+    /** Return whether this widget currently owns application pointer capture. */
     auto is_pointer_captured() const -> bool;
+    /** Borrow the application clipboard. @throws std::logic_error The widget is not
+     * attached.
+     */
     auto clipboard() -> Clipboard&;
+    /** Return the attached frame's width policy, or the default policy while detached. */
     auto glyph_width_policy() const -> esc::WidthPolicy;
+    /** Return the attached screen size, or this widget's assigned size while detached. */
     auto screen_size() const -> Area;
+    /** Return attached tree geometry in screen coordinates, or bounds() while detached. */
     auto global_bounds() const -> Rect;
+    /** Request focus for this attached, eligible widget; return false when detached or
+     * ineligible.
+     */
     auto request_focus() -> bool;
+    /** Request focus for an eligible target in the same application; return whether the
+     * request was accepted for delivery.
+     */
     auto request_focus(Widget& target) -> bool;
+    /** Raise this widget in its attached application's overlay order; detached widgets
+     * do nothing.
+     */
     void bring_to_front();
 
+    /** Enumerate borrowed immediate children in paint order; the default yields none. */
     virtual auto get_children() -> zzz::Generator<Widget&>
     { return zzz::Generator<Widget&>{nullptr}; }
 
+    /** Enumerate the same immediate children read-only; children must survive traversal. */
     virtual auto get_children() const -> zzz::Generator<Widget const&>
     { return zzz::Generator<Widget const&>{nullptr}; }
 
    protected:
+    /** Return a callable that weakly applies effects to the attached loop, or an empty
+     * function while detached.
+     */
     auto effect_handler() const -> std::function<void(EventResponse)>;
     /** Geometry is already updated; use arrange() on children. */
     virtual void on_arrange(Rect /* previous */) {}
 
     /** Schedule painting after a direct widget mutation, if attached. */
     void request_repaint();
+    /** Schedule layout and repaint through the attached application; detached widgets do
+     * nothing.
+     */
     void request_layout();
 
    private:
@@ -188,9 +299,13 @@ class Widget {
 template <typename ConcreteType>
 class LifetimeView {
    public:
+    /** Create an empty, invalid view without extending any widget lifetime. */
     LifetimeView() = default;
 
    public:
+    /** Return the current typed widget address, or null after destruction or
+     * incompatible slicing.
+     */
     [[nodiscard]] auto try_get() const noexcept -> ConcreteType*
     {
         auto pointer = widget_ptr_.lock();
@@ -200,7 +315,9 @@ class LifetimeView {
             return dynamic_cast<ConcreteType*>(*pointer);
         }
     }
+    /** Return whether try_get() currently resolves a compatible live widget. */
     [[nodiscard]] auto valid() const noexcept -> bool { return try_get() != nullptr; }
+    /** Compare tracked identity rather than the widget's current address or dynamic type. */
     template <typename Other>
     auto operator==(LifetimeView<Other> const& other) const -> bool
     {
@@ -208,6 +325,9 @@ class LifetimeView {
                !other.widget_ptr_.owner_before(widget_ptr_);
     }
 
+    /** Borrow the current widget. @throws std::logic_error The identity has expired or
+     * no longer has the requested type.
+     */
     [[nodiscard]] auto get() const -> ConcreteType&
     {
         auto* pointer = try_get();
@@ -226,9 +346,13 @@ class LifetimeView {
     std::weak_ptr<Widget*> widget_ptr_;
 };
 
+/** A widget type, allowing const qualification while retaining inheritance from Widget. */
 template <typename T>
 concept WidgetDerived = std::derived_from<std::remove_cv_t<T>, Widget>;
 
+/** Assign both width and height policies and return the same widget; use individual
+ * fields for one axis.
+ */
 template <WidgetDerived WidgetType>
 auto operator|(WidgetType& w, SizePolicy sp) -> WidgetType&
 {
@@ -237,6 +361,7 @@ auto operator|(WidgetType& w, SizePolicy sp) -> WidgetType&
     return w;
 }
 
+/** Assign both allocation policies and return the moved widget for composition. */
 template <WidgetDerived WidgetType>
 auto operator|(WidgetType&& w, SizePolicy sp) -> WidgetType
 {
@@ -245,6 +370,7 @@ auto operator|(WidgetType&& w, SizePolicy sp) -> WidgetType
     return w;
 }
 
+/** Assign focus eligibility and return the same widget for composition. */
 template <WidgetDerived WidgetType>
 auto operator|(WidgetType& w, FocusPolicy fp) -> WidgetType&
 {
@@ -252,6 +378,7 @@ auto operator|(WidgetType& w, FocusPolicy fp) -> WidgetType&
     return w;
 }
 
+/** Assign focus eligibility and return the moved widget for composition. */
 template <WidgetDerived WidgetType>
 auto operator|(WidgetType&& w, FocusPolicy fp) -> WidgetType
 {
@@ -261,6 +388,9 @@ auto operator|(WidgetType&& w, FocusPolicy fp) -> WidgetType
 
 namespace filter {
 
+/** Range adaptor filtering widgets by their own visible flag; ancestor visibility is not
+ * evaluated.
+ */
 inline constexpr auto is_visible =
     std::views::filter([](Widget const& w) { return w.visible; });
 
@@ -332,12 +462,31 @@ template <typename SlotFn, WidgetDerived... TrackedWidgets>
 
 /** Named signal/slot configuration; invoke immediately to make the connection.
  * The signal owns its slot. Discarding the identifier keeps it connected;
- * signal.disconnect(id) removes it. Tracked targets are borrowed, not owned. */
+ * signal.disconnect(id) removes it. Tracked targets are borrowed, not owned.
+ *
+ * The label argument below is resolved at invocation, so it follows moves and
+ * suppresses the callback after the label is destroyed:
+ * @code{.cpp}
+ * auto count = ox::IntegerLabel{{.value = 0}};
+ * auto button = ox::Button{{.label = {.text = "Increment"}}};
+ * ox::Connection{
+ *     .signal = button.on_activate,
+ *     .slot = [](ox::IntegerLabel& count) { count.set_value(count.value + 1); },
+ * }(count);
+ * @endcode
+ */
 template <typename SignalType, typename SlotType>
 struct [[nodiscard("Use operator() to make the connection.")]] Connection {
+    /** Borrowed signal that owns the subscription after operator() is invoked. */
     SignalType& signal;
+    /** Callback moved into the signal; tracked widgets are appended to its emitted
+     * arguments.
+     */
     SlotType slot;
 
+    /** Subscribe once and return an explicit-disconnection identifier; discarding it
+     * keeps the slot connected.
+     */
     template <WidgetDerived... TrackedWidgets>
         requires std::copy_constructible<SlotType>
     auto operator()(TrackedWidgets&... widgets) && -> sl::Identifier

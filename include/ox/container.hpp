@@ -1,3 +1,6 @@
+/** @file
+ * Padding, page stacks, and clipped scrolling around retained children.
+ */
 #pragma once
 
 #include <limits>
@@ -15,10 +18,14 @@ template <WidgetDerived Child>
 class Padding : public Widget {
    public:
     using Widget::handle;
+    /** Owned child value, arranged inside the wrapper viewport. */
     Child child;
+    /** Top, right, bottom, and left cell insets; negative entries are rejected. */
     std::array<int, 4> padding;
+    /** Base drawing style; explicit colors take precedence over theme defaults. */
     Style style;
 
+    /** Retain one child and validated top/right/bottom/left insets; negative padding throws. */
     explicit Padding(Child child, std::array<int, 4> padding = {}, Style style = {})
         : child{std::move(child)}, padding{padding}, style{style}
     { (void)padding_rect({}, padding); }
@@ -64,22 +71,38 @@ template <LayoutContainer Container>
 class Stack : public Widget {
    public:
     using Widget::handle;
+    /** Page container retained by the stack; only the selected page is exposed to the
+     * application tree.
+     */
     Container children;
+    /** Emits the optional selected page after page layout; invalidated selection is
+     * reported as nullopt.
+     */
     sl::Signal<void(std::optional<std::size_t>)> on_select;
+    /** Create default child storage and select its first page when nonempty. */
     explicit Stack()
         requires std::default_initializable<Container>
         : Stack{Container{}}
     {}
+    /** Retain page storage and initially select index zero if it has pages. */
     explicit Stack(Container children) : children{std::move(children)}
     {
         if (count()) { selected_ = 0; }
     }
+    /** Construct retained page storage from forwarded widget values/references. */
     template <WidgetDerived... Children>
         requires(sizeof...(Children) > 0)
     explicit Stack(Children&&... children)
         : Stack{Container{std::forward<Children>(children)...}}
     {}
+    /** Return the selected page index, or nullopt when no page participates in the
+     * widget tree.
+     */
     auto selected_index() const -> std::optional<std::size_t> { return selected_; }
+    /** Select a page or no page, refresh child geometry, and emit on_select only on change.
+     * Other pages retain their own visible flags and state.
+     * @throws std::out_of_range The requested index is outside the current child storage.
+     */
     auto select(std::optional<std::size_t> index) -> bool
     {
         if (index && *index >= count()) { throw std::out_of_range{"Stack page"}; }
@@ -156,8 +179,10 @@ class Stack : public Widget {
         return result;
     }
 };
+/** Deduce stack storage from an existing tuple or range. */
 template <LayoutContainer Container>
 Stack(Container) -> Stack<Container>;
+/** Deduce tuple page storage from individual widget arguments. */
 template <WidgetDerived... Children>
 Stack(Children&&...) -> Stack<std::tuple<std::decay_t<Children>...>>;
 
@@ -167,10 +192,21 @@ template <WidgetDerived Child>
 class ScrollView : public Widget {
    public:
     using Widget::handle;
+    /** Owned child value, arranged inside the wrapper viewport. */
     Child child;
+    /** Optional requested extent; nonnegative dimensions are required. Call refresh()
+     * after changing it.
+     */
     std::optional<Area> requested_size;
+    /** Base drawing style; explicit colors take precedence over theme defaults. */
     Style style = {};
+    /** Emits (offset, content extent, viewport extent) when scroll state or geometry
+     * changes; units are terminal columns and rows.
+     */
     sl::Signal<void(Point, Area, Area)> on_scroll;
+    /** Retain a child and optional nonnegative requested content size; default focus
+     * policy permits Tab navigation.
+     */
     explicit ScrollView(Child child, std::optional<Area> requested = {})
         : Widget{FocusPolicy::Tab}, child{std::move(child)}, requested_size{requested}
     {
@@ -185,8 +221,11 @@ class ScrollView : public Widget {
         return {std::min(natural.width, available.width),
                 std::min(natural.height, available.height)};
     }
+    /** Return the retained child's scrollable extent in terminal cells. */
     auto content_size() const -> Area { return content_; }
+    /** Return the assigned visible scroll-view extent. */
     auto viewport_size() const -> Area { return size(); }
+    /** Return the clamped offset into child content in terminal columns and rows. */
     auto scroll_offset() const -> Point { return offset_; }
     void refresh() override
     {
@@ -194,6 +233,9 @@ class ScrollView : public Widget {
         layout_child();
     }
 
+    /** Clamp offset, arrange the child at the translated negative position, repaint and
+     * notify on change.
+     */
     auto set_scroll_offset(Point offset) -> bool
     {
         auto next = Point{clamp_scroll(offset.x, content_.width, size().width),
@@ -203,6 +245,9 @@ class ScrollView : public Widget {
         layout_child();
         return true;
     }
+    /** Scroll enough to reveal a nonnegative content-space rectangle on both axes;
+     * oversized rectangles align their beginning.
+     */
     auto reveal(Rect content) -> bool
     {
         validate(content.size);

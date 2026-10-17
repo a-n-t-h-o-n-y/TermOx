@@ -1,3 +1,6 @@
+/** @file
+ * Owned grapheme cells, continuation cells, and frame storage.
+ */
 #pragma once
 
 #include <cstddef>
@@ -17,9 +20,13 @@ class Canvas;
 
 /** A leading cell owns one grapheme. Continuations have empty text and columns == 0. */
 struct Cell {
+    /** Owned grapheme on a leading cell; continuation cells hold an empty string. */
     std::u32string text = U" ";
+    /** Color and trait state for the entire grapheme footprint. */
     Style style = {};
+    /** Leading cell width in terminal columns; zero identifies a continuation cell. */
     std::size_t columns = 1;
+    /** Compare text, width, and style for rendering equality. */
     auto operator==(Cell const& other) const -> bool
     {
         // Single scalars (especially blanks) dominate frame comparison. Avoid a
@@ -34,21 +41,37 @@ struct Cell {
 /** Owns a rectangular grid; all mutation preserves complete grapheme footprints. */
 class Frame {
    public:
+    /** Allocate blank cells and retain an owned copy of width overrides;
+     * negative/overflowing extents throw.
+     */
     explicit Frame(Area size = {0, 0}, esc::WidthPolicy policy = {});
+    /** Copy cells and width assumptions into a distinct rendering identity. */
     Frame(Frame const& other);
+    /** Transfer cells, width assumptions, and rendering identity without allocation. */
     Frame(Frame&& other) noexcept;
+    /** Replace storage by copy/move-and-swap; existing canvases retain their geometry
+     * and clip against the new frame.
+     */
     auto operator=(Frame other) noexcept -> Frame&;
 
+    /** Return the current terminal-cell dimensions. */
     [[nodiscard]] auto size() const -> Area { return size_; }
+    /** Return width assumptions whose override storage is borrowed from this frame. */
     [[nodiscard]] auto width_policy() const -> esc::WidthPolicy;
+    /** Borrow one cell. @throws std::out_of_range Point lies outside the frame. */
     [[nodiscard]] auto operator[](Point point) const -> Cell const&;
+    /** Borrow a read-only row until storage changes. @throws std::out_of_range Invalid row. */
     [[nodiscard]] auto row(int y) const -> std::span<Cell const>;
+    /** Return the leading cell of a grapheme, including when point is on its continuation. */
     [[nodiscard]] auto lead_at(Point point) const -> Point;
 
     /** Reset every cell to a default blank, including when size is unchanged.
      * Invalid sizes and allocation failures leave the original frame intact.
      */
     void resize(Area size);
+    /** Replace all cells by single-column spaces with style; reject invalid style colors
+     * before mutation.
+     */
     void clear(Style style = {});
 
     /** Place exactly one printable grapheme; false means its full footprint did not

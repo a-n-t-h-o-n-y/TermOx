@@ -23,6 +23,9 @@ options, and signals; header links show the declarations in context.
 - [Apps and development tools](https://github.com/a-n-t-h-o-n-y/TermOx/blob/library-refactor/examples/README.md)
 - [Source repository](https://github.com/a-n-t-h-o-n-y/TermOx)
 
-This reference is generated from the public headers. Member listings are complete
-for the extracted API; explanatory comments are being expanded. The handwritten
-reference remains available while that work is in progress.
+This reference is generated from inline comments in the public headers. Methods,
+options, signals, enum values, and inherited interfaces are documented beside their
+declarations. Class pages describe ownership, notifications, errors, and coordinate
+units where they affect use. Escape input and drawing types are summarized on the
+[events](events_8hpp.html) and [glyph](glyph_8hpp.html) header pages, with links to
+the upstream declarations.

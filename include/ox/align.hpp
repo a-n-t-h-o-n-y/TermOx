@@ -1,3 +1,6 @@
+/** @file
+ * Text and child alignment modes.
+ */
 #pragma once
 
 #include <cstdint>
@@ -5,7 +8,13 @@
 namespace ox {
 
 /** Alignment along the text direction. Left/Right are horizontal spellings. */
-enum class Align : std::uint8_t { Start, Center, End, Left = Start, Right = End };
+enum class Align : std::uint8_t {
+    Start, ///< Place content at the beginning of the axis.
+    Center, ///< Center content along the axis.
+    End, ///< Place content at the end of the axis.
+    Left = Start, ///< Horizontal spelling of Start.
+    Right = End ///< Horizontal spelling of End.
+};
 
 /**
  * Return the offset along an axis in cells. Nonnegative extents are required;

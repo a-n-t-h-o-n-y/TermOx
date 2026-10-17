@@ -1,3 +1,6 @@
+/** @file
+ * Resizable pairs of child panes with pointer and keyboard control.
+ */
 #pragma once
 #include <cmath>
 #include <ox/put.hpp>
@@ -10,18 +13,33 @@ template <WidgetDerived First, WidgetDerived Second>
 class SplitPane : public Widget {
    public:
     using Widget::handle;
+    /** Owned first child pane. */
     First first;
+    /** Owned second child pane. */
     Second second;
+    /** Stack panes top/bottom when true; otherwise place them side by side. */
     bool vertical = false;
+    /** Nonnegative minimum extent of the first split pane. */
     int first_minimum = 0;
+    /** Nonnegative minimum extent of the second split pane. */
     int second_minimum = 0;
+    /** Base drawing style; explicit colors take precedence over theme defaults. */
     Style style = {};
+    /** Emits the normalized split ratio after set_ratio() or user dragging/keyboard
+     * commands change it.
+     */
     sl::Signal<void(double)> on_change;
+    /** Retain two panes and a finite clamped initial ratio; size minimums are applied
+     * during arrangement.
+     */
     SplitPane(First first, Second second, double ratio = .5)
         : Widget{FocusPolicy::Strong},
           first{std::move(first)},
           second{std::move(second)}
     { set_ratio(ratio); }
+    /** Transfer widget identity, retained state, and signal subscriptions; tracked
+     * references follow the move.
+     */
     SplitPane(SplitPane&& other)
         : Widget{std::move(other)},
           first{std::move(other.first)},
@@ -35,6 +53,9 @@ class SplitPane : public Widget {
           divider_{other.divider_},
           dragging_{std::exchange(other.dragging_, false)}
     {}
+    /** Replace this widget's identity and retained state with the source; previous
+     * lifetime views of this identity expire.
+     */
     auto operator=(SplitPane&& other) -> SplitPane&
     {
         if (this == &other) { return *this; }
@@ -51,7 +72,13 @@ class SplitPane : public Widget {
         dragging_ = std::exchange(other.dragging_, false);
         return *this;
     }
+    /** Return the requested split fraction, preserved across resize independently of
+     * minimum-constrained pane geometry.
+     */
     auto ratio() const -> double { return ratio_; }
+    /** Clamp a finite ratio to [0,1], refresh pane geometry, and emit on_change only on change.
+     * @throws std::invalid_argument The ratio is nonfinite.
+     */
     auto set_ratio(double ratio) -> bool
     {
         if (!std::isfinite(ratio)) {

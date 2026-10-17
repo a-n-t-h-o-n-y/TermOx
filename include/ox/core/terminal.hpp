@@ -1,3 +1,6 @@
+/** @file
+ * Terminal session lifetime, input, and changed-frame presentation.
+ */
 #pragma once
 
 #include <chrono>
@@ -19,15 +22,26 @@ using ::esc::Signals;
  */
 class Terminal {
    public:
+    /** Session input modes and fallback colors; field initializers define the defaults. */
     struct Options {
+        /** Escape mouse-reporting mode enabled for this session. */
         MouseMode mouse_mode = MouseMode::Basic;
+        /** Whether Escape manages operating-system signal handling. */
         Signals signals = Signals::Off;
+        /** Fallback foreground for cells using the terminal default foreground. */
         Color foreground = default_color;
+        /** Fallback background for cells using the terminal default background. */
         Color background = default_color;
     };
 
    public:
+    /** Fallback foreground passed to the renderer; explicit cell foreground colors take
+     * precedence.
+     */
     Color foreground = default_color;
+    /** Fallback background passed to the renderer; explicit cell background colors take
+     * precedence.
+     */
     Color background = default_color;
 
    public:
@@ -49,7 +63,9 @@ class Terminal {
              Color foreground_ = default_color,
              Color background_ = default_color);
 
+    /** A live terminal session cannot move between owners. */
     Terminal(Terminal&&) = delete;
+    /** Terminal sessions cannot be move-assigned. */
     auto operator=(Terminal&&) -> Terminal& = delete;
 
     /**

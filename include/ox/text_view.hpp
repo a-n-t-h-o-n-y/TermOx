@@ -1,3 +1,6 @@
+/** @file
+ * Text viewport geometry, caret visibility, and hit testing.
+ */
 #pragma once
 
 #include <ox/align.hpp>
@@ -6,7 +9,11 @@
 
 namespace ox {
 
+/** Return the widest display row and display-row count from cached text analysis. */
 [[nodiscard]] auto text_content_size(TextLayout const& layout) -> Area;
+/** Analyze and measure text under available width, wrapping, and owned width
+ * assumptions; never mutate a widget tree.
+ */
 [[nodiscard]] auto measure_text(std::string_view text,
                                 Area available,
                                 TextWrap wrap = TextWrap::None,
@@ -27,6 +34,7 @@ namespace ox {
                                  Area size,
                                  Align align = Align::Left,
                                  Point scroll = {}) -> Point;
+/** Map an aligned, scrolled local cell to a clamped UTF-8 grapheme boundary. */
 [[nodiscard]] auto text_offset(TextLayout const& layout,
                                Point at,
                                Area size,
@@ -43,8 +51,9 @@ void paint_text(Canvas canvas,
                 Style selected = {},
                 std::pair<std::size_t, std::size_t> selection = {0, 0});
 
-/** Default input composition: edit, update layout, and reveal the caret.
- * Uses the layout's owned width policy. Widget-specific effects remain with callers. */
+/** Apply key input, update layout using its owned width policy, and reveal the caret.
+ * Return effects for the caller to apply; read_only suppresses document edits.
+ */
 [[nodiscard]] auto edit_text(TextEdit& editor,
                              TextLayout& layout,
                              Point& scroll,
@@ -54,6 +63,9 @@ void paint_text(Canvas canvas,
                              KeyEvent const& key,
                              std::function<bool(char32_t)> const& accept = {},
                              bool read_only = false) -> EventResponse;
+/** Apply one input chunk/event, refresh layout, reveal the caret, and return effects;
+ * read_only suppresses document edits.
+ */
 [[nodiscard]] auto edit_text(TextEdit& editor,
                              TextLayout& layout,
                              Point& scroll,

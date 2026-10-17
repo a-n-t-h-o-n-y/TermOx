@@ -41,19 +41,24 @@ it is merged, change the workflow's push branch and both deployment conditions t
 
 ## Inline documentation
 
-The initial configuration extracts public declarations even when their comments
-are incomplete, and excludes private members. Shared implementation bases are
-parsed so public classes retain their inherited methods, options, and signals;
-inherited members are listed directly on each public class page. It treats malformed
-comments and parameter mismatches as build failures; diagnostics are written to
-`build/docs/warnings.log`. Missing descriptions are not yet failures. Once public
-API comments are complete, turn off `EXTRACT_ALL` and enable undocumented-member
-and parameter checks.
+Public declarations and enum values must have descriptions. The build fails on
+missing descriptions, malformed comments, and parameter-name mismatches; diagnostics
+are written to `build/docs/warnings.log`. Private members are excluded. Shared
+implementation bases are parsed so public classes retain their inherited methods,
+options, and signals, listed directly on each class page. Trivial overrides may
+inherit their base documentation; document them explicitly when behavior differs.
 
-Keep contracts beside their declarations: ownership, signal emission, exceptions,
-thread restrictions, and layout/repaint effects. Guides and app walkthroughs remain
-Markdown in the repository. The handwritten reference stays until those contracts
-have been transferred and verified.
+Keep contracts beside their declarations: ownership and borrowed lifetimes, return
+values, signal emission, exceptions, thread restrictions, units, and layout/repaint
+effects. Describe behavior without restating the signature. Document parameters
+when their meaning or constraints need explanation; a parameter list is not required
+for every self-explanatory argument. Small code blocks belong beside the interface
+they demonstrate. Compile changed snippets before publishing.
+
+Guides and app walkthroughs remain Markdown in the repository. The generated site
+is the method-level reference; the handwritten topic summaries remain available for
+broader context. Escape's re-exported types are summarized in the glyph and events
+header comments, with links to their upstream declarations.
 
 ## Appearance and versions
 

@@ -1,11 +1,20 @@
+/** @file
+ * Named editor fields, validation, and form submission.
+ */
 #pragma once
 #include <ox/layout.hpp>
 #include <ox/routing.hpp>
 #include <ox/selection.hpp>
 namespace ox {
+/** Metadata and optional commit/validation callbacks for one corresponding field widget. */
 struct FormField {
+    /** Printable single-line field label displayed in the form's label column. */
     std::string label;
+    /** Optional single-line help message shown when no validation error is present. */
     std::string help = {};
+    /** Inspect committed field state; return a printable error message or nullopt for
+     * validity. Runs after every field draft has been committed.
+     */
     std::function<std::optional<std::string>(Widget const&)> validate = {};
     /** Override draft commit, including for fields stored through Widget references. */
     std::function<bool(Widget&)> commit = {};
@@ -15,13 +24,27 @@ template <LayoutContainer Container>
 class Form : public Widget {
    public:
     using Widget::handle;
+    /** Field widget storage; its element count must equal the field-description count. */
     Container children;
+    /** Base drawing style; explicit colors take precedence over theme defaults. */
     Style style = {};
+    /** Style patch for validation messages below form fields. */
     Style error_style = {.foreground = colors::red};
+    /** Nonnegative cells between adjacent children or field rows; call refresh() after
+     * direct changes.
+     */
     int gap = 1;
+    /** Width of the form label column, or automatic sizing when unspecified. */
     std::optional<int> label_width;
+    /** Emits after all drafts commit and all validators pass. */
     sl::Signal<void()> on_submit;
+    /** Emits the per-field optional error messages after failed submission and focus
+     * recovery.
+     */
     sl::Signal<void(std::vector<std::optional<std::string>> const&)> on_invalid;
+    /** Retain field widgets and descriptions with equal counts; install scoped
+     * Ctrl+Enter submission.
+     */
     Form(Container children, std::vector<FormField> fields)
         : Widget{}, children{std::move(children)}
     {
@@ -40,9 +63,16 @@ class Form : public Widget {
             return focused ? self->handle(event) : EventResponse{};
         };
     }
+    /** Borrow field labels, help, and callbacks until set_fields(). */
     auto fields() const -> std::span<FormField const> { return fields_; }
+    /** Borrow per-field validation results until submission or field-description
+     * replacement.
+     */
     auto errors() const -> std::span<std::optional<std::string> const>
     { return errors_; }
+    /** Validate metadata and field count, clear prior errors, and refresh geometry.
+     * Invalid counts or row text throw before replacement.
+     */
     void set_fields(std::vector<FormField> fields)
     {
         std::size_t count = 0;
@@ -57,6 +87,10 @@ class Form : public Widget {
         layouts_.resize(count);
         refresh();
     }
+    /** Commit every field draft before running cross-field validators, then refresh messages and geometry.
+     * On success emit on_submit; otherwise focus the first invalid field and emit on_invalid.
+     * Return validity. This is not an atomic transaction: successfully committed fields stay committed when another field fails.
+     */
     auto submit() -> bool
     {
         auto lifetime = track(*this);

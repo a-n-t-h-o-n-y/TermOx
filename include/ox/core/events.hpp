@@ -1,3 +1,16 @@
+/** @file
+ * Escape input types and TermOx dispatch effects and custom events.
+ *
+ * `KeyEvent`, `Key`, `KeyCode`, `KeyAction`, `Modifiers`, and the mouse event
+ * types are re-exported from Escape. A key event contains its key identity,
+ * modifiers, action (press/repeat/release), and optional associated Unicode text.
+ * Use `matches()` for shortcuts and input_text() for printable text. Mouse
+ * positions delivered to Widget handlers are local terminal-cell coordinates.
+ *
+ * Paste, resize, focus, and terminal protocol events retain their `esc::` names.
+ * See [Escape's event declarations](https://github.com/a-n-t-h-o-n-y/Escape/blob/c714abfa0061526ec0d9ab593b4a8ab447c1d412/include/esc/event.hpp).
+ * @see Event, EventResponse, Application::dispatch()
+ */
 #pragma once
 
 #include <functional>
@@ -47,8 +60,11 @@ using ::esc::MouseWheel;
 
 /** Handling, painting, and exiting are independent decisions. */
 struct EventResponse {
+    /** Stop ancestor input propagation when true; this alone does not request repaint. */
     bool handled = false;
+    /** Request a coalesced frame after dispatch; ignored once quitting takes precedence. */
     bool repaint = false;
+    /** Optional exit status; combine() preserves the first requested status. */
     std::optional<int> quit = std::nullopt;
 };
 
@@ -65,14 +81,20 @@ struct EventResponse {
 
 namespace event {
 
+/** Posted application-thread work represented as an event. */
 struct Custom {
+    /** Callback invoked at dispatch; captures must remain valid until delivery or event
+     * destruction.
+     */
     std::function<EventResponse()> action;
 };
 
+/** Termination notification mapped to an exit request by dispatch(). */
 struct Interrupt {};
 
 }  // namespace event
 
+/** Owned input, resize, custom-work, and interrupt payload accepted by EventLoop::post(). */
 using Event = std::variant<esc::MousePress,
                            esc::MouseRelease,
                            esc::MouseWheel,

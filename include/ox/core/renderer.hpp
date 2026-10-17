@@ -1,3 +1,6 @@
+/** @file
+ * Frame differencing and terminal output without widget dependencies.
+ */
 #pragma once
 
 #include <optional>
@@ -15,6 +18,9 @@ namespace ox {
  * Owns its profile, previous cells, and reusable output storage. */
 class Renderer {
    public:
+    /** Own the terminal capability profile; color adaptation and output encoding use
+     * this fixed profile.
+     */
     explicit Renderer(esc::TerminalProfile profile);
 
     /** The returned bytes borrow storage until the next render or destruction.

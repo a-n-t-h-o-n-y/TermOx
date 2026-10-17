@@ -1,3 +1,6 @@
+/** @file
+ * Event delivery and effect propagation without terminal I/O.
+ */
 #pragma once
 
 #include <concepts>

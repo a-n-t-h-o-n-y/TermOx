@@ -1,3 +1,6 @@
+/** @file
+ * Rows, columns, padding, stacks, and suspending child layout.
+ */
 #pragma once
 
 #include <algorithm>
@@ -19,18 +22,25 @@
 
 namespace ox {
 
-/** Mutable widget values/references in a tuple, pair, array, or sized forward range. */
+/** Tuple protocol used for fixed child storage, including tuples, pairs, and arrays. */
 template <typename T>
 concept TupleLike = requires {
     { std::tuple_size<T>::value } -> std::convertible_to<std::size_t>;
 };
+/** A sized forward range used as layout child storage, excluding tuple-like containers. */
 template <typename T>
 concept DynamicContainer = not TupleLike<std::remove_reference_t<T>> &&
                            std::ranges::sized_range<T> && std::ranges::forward_range<T>;
+/** Tuple-like or sized forward-range child storage accepted by layouts, stacks, tabs,
+ * and forms.
+ */
 template <typename T>
 concept LayoutContainer = DynamicContainer<T> || TupleLike<T>;
 
 namespace detail {
+/** Invoke a function on each stored widget/reference in tuple or range order; the
+ * container is borrowed during traversal.
+ */
 template <LayoutContainer Container, typename Function>
 void for_each_child(Container& container, Function function)
 {
@@ -44,6 +54,9 @@ void for_each_child(Container& container, Function function)
     }
 }
 
+/** Yield borrowed immediate widget references in storage order; the container must
+ * survive coroutine iteration.
+ */
 template <LayoutContainer Container>
 auto child_references(Container& container) -> zzz::Generator<
     std::conditional_t<std::is_const_v<Container>, Widget const&, Widget&>>
@@ -68,28 +81,48 @@ auto child_references(Container& container) -> zzz::Generator<
     }
 }
 
+/** Shared Row/Column implementation over retained tuple or range storage.
+ * Invisible children and overlays do not consume normal layout space. Axis policies
+ * control allocation, gap separates visible children, and cross_align controls the
+ * other axis. Call refresh() after changing storage or public layout configuration.
+ */
 template <typename Container, bool Horizontal>
 class LinearLayout : public Widget {
     static_assert(LayoutContainer<Container>);
 
    public:
     using Widget::handle;
+    /** Child storage retained by value; tuples of references borrow rather than own the
+     * referenced widgets.
+     */
     Container children;
+    /** Nonnegative cells between adjacent children or field rows; call refresh() after
+     * direct changes.
+     */
     int gap = 0;
+    /** Placement or stretching perpendicular to the layout's main axis. */
     CrossAlign cross_align = CrossAlign::Stretch;
 
+    /** Create empty default-initialized child storage without taking focus. */
     explicit LinearLayout()
         requires std::default_initializable<Container>
         : Widget{FocusPolicy::None, SizePolicy::flex()}, children{}
     {}
+    /** Retain child storage by value; tuples of references continue to borrow external
+     * widgets.
+     */
     explicit LinearLayout(Container container)
         : Widget{FocusPolicy::None, SizePolicy::flex()}, children{std::move(container)}
     {}
+    /** Build tuple/range storage from forwarded child values or references. */
     template <WidgetDerived... Widgets>
         requires(sizeof...(Widgets) > 0)
     explicit LinearLayout(Widgets&&... widgets)
         : LinearLayout{Container{std::forward<Widgets>(widgets)...}}
     {}
+    /** Transfer widget identity, retained state, and signal subscriptions; tracked
+     * references follow the move.
+     */
     LinearLayout(LinearLayout&& other)
         : Widget{std::move(other)},
           children{std::move(other.children)},
@@ -107,6 +140,9 @@ class LinearLayout : public Widget {
           arranging_{std::exchange(other.arranging_, false)},
           pending_{std::exchange(other.pending_, false)}
     { other.available_ = {-1, -1}; }
+    /** Replace this widget's identity and retained state with the source; previous
+     * lifetime views of this identity expire.
+     */
     auto operator=(LinearLayout&& other) -> LinearLayout&
     {
         if (this == &other) { return *this; }
@@ -333,33 +369,51 @@ class Column : public detail::LinearLayout<Container, false> {
    public:
     using detail::LinearLayout<Container, false>::LinearLayout;
 };
+/** Deduce column storage from the supplied container. */
 template <LayoutContainer Container>
 Column(Container) -> Column<Container>;
+/** Deduce owned tuple storage from individual column child arguments. */
 template <WidgetDerived... Widgets>
 Column(Widgets&&...) -> Column<std::tuple<std::decay_t<Widgets>...>>;
 
+/** Lay out visible non-overlay children horizontally, with width policies controlling
+ * growth and cross_align controlling vertical placement.
+ */
 template <LayoutContainer Container>
 class Row : public detail::LinearLayout<Container, true> {
    public:
     using detail::LinearLayout<Container, true>::LinearLayout;
 };
+/** Deduce row storage from the supplied container. */
 template <LayoutContainer Container>
 Row(Container) -> Row<Container>;
+/** Deduce owned tuple storage from individual row child arguments. */
 template <WidgetDerived... Widgets>
 Row(Widgets&&...) -> Row<std::tuple<std::decay_t<Widgets>...>>;
 
 // -------------------------------------------------------------------------------------
 
+/** Center one retained child at a requested size and paint a fill glyph outside its
+ * clipped bounds.
+ */
 template <WidgetDerived ChildType>
 class Suspended : public Widget {
    public:
     using Widget::handle;
 
+    /** Retained child widget centered within the available area. */
     ChildType child;
+    /** Requested child extent; dimensions must be nonnegative. Call refresh() after
+     * changing it.
+     */
     Area requested_size;
+    /** Background glyph used by Suspended when painting its unused area. */
     Glyph fill_glyph;
 
    public:
+    /** Own the child and a nonnegative requested extent; oversized children are
+     * constrained to the available area.
+     */
     explicit Suspended(ChildType&& child, Area requested, Glyph fill = {U' '})
         : Widget{FocusPolicy::None, SizePolicy::flex()},
           child{std::move(child)},
@@ -401,26 +455,32 @@ class Suspended : public Widget {
 
 // -------------------------------------------------------------------------------------
 
+/** Borrow the Ith stored row child; I is a compile-time tuple index. */
 template <std::size_t I, TupleLike Container>
 auto get_child(Row<Container>& row) -> auto&
 { return std::get<I>(row.children); }
 
+/** Borrow the Ith stored column child; I is a compile-time tuple index. */
 template <std::size_t I, TupleLike Container>
 auto get_child(Column<Container>& row) -> auto&
 { return std::get<I>(row.children); }
 
+/** Borrow the Ith stored row child read-only. */
 template <std::size_t I, TupleLike Container>
 auto get_child(Row<Container> const& row) -> auto const&
 { return std::get<I>(row.children); }
 
+/** Borrow the Ith stored column child read-only. */
 template <std::size_t I, TupleLike Container>
 auto get_child(Column<Container> const& column) -> auto const&
 { return std::get<I>(column.children); }
 
+/** Borrow the centered child read-only. */
 template <WidgetDerived ChildType>
 auto get_child(Suspended<ChildType> const& suspended) -> auto const&
 { return suspended.child; }
 
+/** Borrow the centered child without changing ownership. */
 template <WidgetDerived ChildType>
 auto get_child(Suspended<ChildType>& sus) -> auto&
 { return sus.child; }

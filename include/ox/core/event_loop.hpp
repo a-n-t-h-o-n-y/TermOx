@@ -1,3 +1,6 @@
+/** @file
+ * Queued input, deadlines, animation frames, and headless stepping.
+ */
 #pragma once
 
 #include <chrono>
@@ -18,34 +21,63 @@ namespace ox {
  */
 class EventLoop {
    public:
+    /** Monotonic clock shared by timers and frame scheduling. */
     using Clock = std::chrono::steady_clock;
 
+    /** Create an empty headless loop and its platform wakeup source; no terminal is opened. */
     EventLoop();
+    /** Expire effect sinks and release event-loop registrations and wakeup resources. */
     ~EventLoop();
 
     /** Wait for posted events, timers, or a borrowed terminal wait source.
      * Does not consume terminal input. Call on the dispatch thread. */
     void wait(esc::WaitState input = {});
 
+    /** Owned current frame, initially empty; resize dispatch sets its dimensions. */
     Frame screen{{0, 0}};
+    /** Optional global caret from the last painted frame. */
     Cursor cursor;
 
+    /** Thread-safe enqueue; wake an idle driver when work becomes available. Callback
+     * posts wait for the next step.
+     */
     void post(Event event);
+    /** Borrow timer state for scheduling; duplicate registration is harmless and another
+     * owning loop is rejected.
+     */
     void watch(Timer const& timer);
+    /** Borrow a widget animation for the shared frame clock; no per-animation thread is
+     * created.
+     */
     void watch(Animation const& animation);
+    /** Stop and release this loop's timer registration; a timer owned elsewhere is
+     * unchanged.
+     */
     void unwatch(Timer const& timer);
     /** Apply effects at the dispatch boundary; first quit request wins. */
     void apply(EventResponse response);
     /** Owner-thread effects sink, safe after the loop or source widget is destroyed. */
     auto effect_handler() -> std::function<void(EventResponse)>;
+    /** Set the pending-frame flag on the dispatch thread; repeated calls coalesce. */
     void request_repaint();
+    /** Keep the first exit status and suppress subsequent dispatch and painting. */
     void quit(int code = 0);
 
+    /** Return the first requested exit status, or nullopt while running. */
     [[nodiscard]] auto exit_code() const -> std::optional<int> { return exit_code_; }
+    /** Return whether a frame has been requested, even if an exit later prevents painting. */
     [[nodiscard]] auto needs_repaint() const -> bool { return repaint_; }
+    /** Return time until scheduled work is due; use wait() for platform-aware blocking
+     * and post wakeups.
+     */
     [[nodiscard]] auto wait_duration(Clock::time_point now = Clock::now()) const
         -> std::chrono::milliseconds;
 
+    /** Dispatch a snapshot of posted events, then due timers and animations, applying each response.
+     * Posts and timers added by callbacks do not extend the current event/timer snapshot.
+     * Late timers deliver one tick and preserve cadence rather than replaying missed ticks.
+     * Quit stops the batch. Handler exceptions propagate to the caller.
+     */
     template <typename Handler>
     auto step(Handler& handler, Clock::time_point now = Clock::now()) -> EventResponse
     {
@@ -80,6 +112,10 @@ class EventLoop {
         return result;
     }
 
+    /** Paint once only when a frame is pending and the loop has not quit; return whether to present it.
+     * When handler supplies paint(Canvas) returning Cursor, clear screen first and retain its caret.
+     * This operation performs no terminal I/O.
+     */
     template <typename Handler>
     auto paint(Handler& handler) -> bool
     {
