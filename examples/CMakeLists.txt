@@ -92,3 +92,8 @@ target_link_libraries(TermOx.examples.showcase PRIVATE TermOx)
 add_executable(TermOx.examples.stress EXCLUDE_FROM_ALL stress.cpp)
 target_compile_options(TermOx.examples.stress PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(TermOx.examples.stress PRIVATE TermOx)
+
+# Copy the sample beside the build outputs; opening it does not depend on cwd.
+configure_file(assets/julia.bmp assets/julia.bmp COPYONLY)
+target_compile_definitions(TermOx.examples.showcase PRIVATE
+    TERMOX_SHOWCASE_BMP="${CMAKE_CURRENT_BINARY_DIR}/assets/julia.bmp")

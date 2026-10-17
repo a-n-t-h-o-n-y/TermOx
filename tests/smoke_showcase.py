@@ -22,3 +22,6 @@ smoke(showcase, [b"\x10", b"files", b"\r", b"\t", b"\x1b[B"],
 # Select a new preset through the command palette, then cycle past the last preset.
 smoke(showcase, [b"\x10", b"High contrast", b"\r", b"\x1bOQ"],
       ["--theme", "paper"])
+# Open the BMP browser from the palette, dismiss it, then return to the image.
+smoke(showcase, [b"\x10", b"Open BMP", b"\r", b"", b"\x1b", b"\t", b"\r"],
+      ["--page", "4"])

@@ -189,7 +189,8 @@ cmake --build build --target TermOx.examples.showcase
 
 The six pages cover animation and values; a validated form and selection controls;
 filterable lists, tables, trees, logs, and split panes; Unicode text editing and
-labels; pixel graphics; and file picking. Menus, a command palette, dialogs,
+labels; a [BMP viewer](../examples/bmp-viewer.md) with file opening, zoom, and image
+details; and file picking. Menus, a command palette, dialogs,
 keyboard help, linked scrollbars, and responsive layouts connect the pages.
 
 Use Tab for focus, Ctrl+Tab to change pages, Ctrl+P for commands, F1 for expanded

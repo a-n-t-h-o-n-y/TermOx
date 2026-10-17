@@ -25,7 +25,9 @@ The linked guides describe the relevant APIs.
 | [bmp_view.cpp](bmp_view.cpp) | Load a BMP file and display its pixels; pass the filename as an argument | [PixelGrid reference](../docs/reference/drawing.md#oxpixelgrid) |
 | [accumulator.cpp](accumulator.cpp) | Numeric input and a running total | [Widget API](../docs/widget-api.md) |
 
-`bmp_reader.hpp` is a helper used by the BMP viewer, not a separate executable.
+The showcase also includes a [BMP viewer](bmp-viewer.md) with a bundled fractal,
+file opening, zoom, panning, and image details. `bmp_reader.hpp` and `bmp_image.hpp`
+are shared image helpers, not separate executables.
 
 ## Development tools
 

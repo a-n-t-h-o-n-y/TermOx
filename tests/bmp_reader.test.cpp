@@ -4,6 +4,7 @@
 #include <limits>
 
 #include "../examples/bmp_reader.hpp"
+#include "../examples/bmp_image.hpp"
 
 namespace {
 void put(std::vector<std::byte>& bytes,
@@ -32,6 +33,39 @@ auto bitmap(int width, int height, int depth, std::size_t offset = 54)
     return bytes;
 }
 }  // namespace
+
+TEST(bmp_viewer_fits_zooms_clamps_pan_and_keeps_image_after_failed_load)
+{
+    auto path = std::filesystem::path{__FILE__}.parent_path() /
+                "../examples/assets/julia.bmp";
+    auto image = example::BmpImage{};
+    image.load(path);
+    ox::arrange(image, {{}, {80, 24}});
+    ASSERT((image.pixel_size() == ox::Area{640, 400}));
+    ASSERT(image.is_fit() && image.zoom_percent() == 12);
+    image.zoom(1.);
+    ASSERT((image.offset() == ox::Point{280, 176}));
+    image.pan({100000, 100000});
+    ASSERT((image.offset() == ox::Point{560, 352}));
+    auto [size, pixels] = example::parse_bmp([&] {
+        auto file = std::ifstream{path, std::ios::binary};
+        auto chars = std::vector<char>{std::istreambuf_iterator<char>{file}, {}};
+        auto bytes = std::as_bytes(std::span{chars});
+        return std::vector<std::byte>{bytes.begin(), bytes.end()};
+    }());
+    auto frame = ox::Frame{ox::Area{80, 24}};
+    image.paint(ox::Canvas{frame});
+    ASSERT((frame[{0, 0}].style.background == ox::Color{pixels[352 * size.width + 560]}));
+    ASSERT((frame[{0, 0}].style.foreground == ox::Color{pixels[353 * size.width + 560]}));
+    auto description = image.description();
+    ASSERT_THROWS(image.load(path.parent_path()), std::runtime_error);
+    ASSERT(image.description() == description);
+    image.fit();
+    ox::arrange(image, {{}, {0, 0}});
+    image.paint(ox::Canvas{frame}.subcanvas({}, {}));
+    ox::arrange(image, {{}, {120, 38}});
+    ASSERT(image.is_fit() && image.offset() == ox::Point{});
+}
 
 TEST(bmp_direct_color_decoding_handles_padding_and_both_row_orders)
 {

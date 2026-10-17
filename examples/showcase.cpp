@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cctype>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -8,6 +9,7 @@
 #include <ox/ox.hpp>
 #include <sstream>
 #include <string_view>
+#include "bmp_image.hpp"
 using namespace ox;
 using namespace std::chrono_literals;
 
@@ -507,30 +509,68 @@ int main(int argc, char** argv)
     auto text_section = section(text_content, "Text editing");
     auto text = ScrollView{View{text_section}};
 
-    // Native half-block image rendering inside a clipped two-axis viewport.
-    auto image = PixelGrid{{100, 36}};
-    auto graphics_scroll = ScrollView{View{image}};
-    graphics_scroll.requested_size = Area{100, 18};
-    auto graphics_bar = ScrollBar{};
-    auto graphics_horizontal = ScrollBar{{.vertical = false}};
-    link(graphics_scroll, graphics_bar);
-    link(graphics_scroll, graphics_horizontal);
-    auto image_body = Row{std::tie(graphics_scroll, graphics_bar)};
-    panel_height(image_body, 16);
-    auto graphics_note =
-        caption("Half-block pixels · clipped canvas · two-axis scrolling");
-    auto graphics_content =
-        Column{std::tie(graphics_note, image_body, graphics_horizontal)};
-    graphics_content.gap = 1;
-    auto graphics_section = section(graphics_content, "Character graphics");
-    auto graphics = ScrollView{View{graphics_section}};
-    for (int y = 0; y < 36; ++y)
-        for (int x = 0; x < 100; ++x) {
-            auto ripple = (std::sin(x * .13) + std::cos(y * .24) + 2) / 4;
-            image.at({x, y}) = RGB{(std::uint8_t)(25 + 190 * ripple),
-                                   (std::uint8_t)(70 + 95 * (1 - ripple)),
-                                   (std::uint8_t)(60 + 85 * (1 - ripple))};
+    // A complete image viewer: source pixels stay unchanged while the viewport scales.
+    auto image = example::BmpImage{};
+    auto image_open = Button{{.label = {.text = "Open BMP"}}};
+    auto image_sample = Button{{.label = {.text = "Sample"}}};
+    auto image_fit = Button{{.label = {.text = "Fit"}}};
+    auto image_native = Button{{.label = {.text = "100%"}}};
+    auto image_smaller = Button{{.label = {.text = "-"}}};
+    auto image_larger = Button{{.label = {.text = "+"}}};
+    auto image_zoom = caption("Fit");
+    auto image_actions = Row{std::tie(image_open, image_sample, image_fit,
+                                    image_native, image_smaller, image_larger,
+                                    image_zoom)};
+    panel_height(image_actions, 1);
+    auto image_info = caption("");
+    auto image_note = caption("Tab to image; arrows or wheel pan. Fit restores the whole image.");
+    auto image_frame = View{image, true} | Border{.label = {.text = " BMP viewer "}};
+    auto graphics = Column{std::tie(image_actions, image_info, image_frame, image_note)};
+    auto image_picker = FilePicker{{
+        .directory = std::filesystem::path{TERMOX_SHOWCASE_BMP}.parent_path(),
+        .filter = [](std::filesystem::directory_entry const& entry) {
+            auto extension = entry.path().extension().string();
+            std::ranges::transform(extension, extension.begin(), [](unsigned char c) {
+                return (char)std::tolower(c);
+            });
+            return extension == ".bmp";
+        }}};
+    auto image_error = caption("");
+    auto image_dialog_body = Column{std::tie(image_picker, image_error)};
+    auto image_dialog = Dialog{View{image_dialog_body}, "Open BMP"};
+    image_dialog.requested_size = Area{72, 22};
+    auto update_image_info = [&] {
+        image_info.set_text(image.description());
+        image_zoom.set_text(image.is_fit() ? "Fit" :
+                            std::to_string(image.zoom_percent()) + "%");
+    };
+    auto load_image = [&](std::filesystem::path const& path) {
+        try {
+            image.load(path);
+            update_image_info();
+            image_error.set_text("");
+            return true;
         }
+        catch (std::exception const& error) {
+            image_error.set_text(error.what());
+            return false;
+        }
+    };
+    if (!load_image(TERMOX_SHOWCASE_BMP))
+        image_info.set_text("Bundled image unavailable: " + image_error.text);
+    image_open.on_activate.connect([&] { image_error.set_text(""); image_dialog.show(); });
+    image_sample.on_activate.connect([&] {
+        if (!load_image(TERMOX_SHOWCASE_BMP)) image_info.set_text(image_error.text);
+    });
+    image_fit.on_activate.connect([&] { image.fit(); update_image_info(); });
+    image_native.on_activate.connect([&] { image.zoom(1.); update_image_info(); });
+    image_smaller.on_activate.connect([&] { image.zoom_by(.5); update_image_info(); });
+    image_larger.on_activate.connect([&] { image.zoom_by(2.); update_image_info(); });
+    image_picker.on_choose.connect([&](auto const& path) {
+        if (load_image(path)) image_dialog.accept();
+    });
+    image_picker.on_cancel.connect([&] { image_dialog.reject(); });
+    image_picker.on_error.connect([&](auto const& error) { image_error.set_text(error); });
 
     auto picker = FilePicker{};
     auto picked = caption("Choose a file to display its path.");
@@ -541,7 +581,7 @@ int main(int argc, char** argv)
 
     auto tabs = Tabs{std::tie(overview, controls, data, text, graphics, files),
                      std::vector<std::string>{"Overview", "Controls", "Data", "Text",
-                                              "Graphics", "Files"}};
+                                              "BMP Viewer", "Files"}};
 
     // Overlays remain ordinary widgets with modal focus and keyboard routing.
     auto dialog_text =
@@ -567,7 +607,7 @@ int main(int argc, char** argv)
     // The page takes the remaining height; its natural content scrolls inside it.
     auto page_area = View{tabs, true};
     auto root_content = Column{std::tie(toolbar, intro, menu, page_area, status, help,
-                                        dialog, command_dialog)};
+                                        dialog, command_dialog, image_dialog)};
     auto root = Padding{std::move(root_content), std::array{1, 2, 1, 2}};
     auto app = Application{root};
 
@@ -740,7 +780,17 @@ int main(int argc, char** argv)
     auto overview_command = page_command("Overview", 0),
          controls_command = page_command("Controls", 1),
          data_command = page_command("Data", 2),
+         image_command = page_command("BMP viewer", 4),
          files_command = page_command("Browse files", 5);
+    auto image_open_command = command({.text = "Open BMP",
+        .keywords = "image picture file",
+        .action = [&] {
+            close_commands();
+            go(4);
+            image_error.set_text("");
+            image_dialog.show();
+            return EventResponse{.repaint = true};
+        }});
     auto run_command = command({.text = "Run animation sequence",
                                 .keywords = "motion progress",
                                 .action = [&] {
@@ -756,7 +806,8 @@ int main(int argc, char** argv)
                          .action = [] { return EventResponse{.quit = 0}; },
                          .keys = {{U'q', {.ctrl = true}}}});
     auto palette_commands = std::vector<std::shared_ptr<Command>>{
-        run_command, show_commands, open_dialog, toggle_motion, files_command, quit};
+        run_command, show_commands, open_dialog, toggle_motion, image_command,
+        image_open_command, files_command, quit};
     palette_commands.insert(palette_commands.end(), theme_commands.begin(),
                             theme_commands.end());
     commands.set_commands(std::move(palette_commands));
@@ -765,6 +816,7 @@ int main(int argc, char** argv)
           {{.command = overview_command},
            {.command = controls_command},
            {.command = data_command},
+           {.command = image_command},
            {.command = files_command}}},
          {"Actions",
           {{.command = show_commands},
@@ -811,6 +863,21 @@ int main(int argc, char** argv)
             app.paint();
         };
         if (check) {
+            if (image.pixel_size() != Area{640, 400}) return 7;
+            tabs.select(4);
+            render({80, 24});
+            image.zoom(1.);
+            image.pan({100, 80});
+            if (image.offset() == Point{}) return 8;
+            auto original_image = image.description();
+            if (load_image(std::filesystem::path{TERMOX_SHOWCASE_BMP}.parent_path()) ||
+                image.description() != original_image) return 9;
+            image.fit();
+            image_dialog.show();
+            app.step();
+            app.paint();
+            image_dialog.reject();
+            update_image_info();
             for (auto size :
                  {Area{120, 38}, Area{80, 24}, Area{40, 16}, Area{1, 1}, Area{0, 0}})
                 for (std::size_t i = 0; i < 6; ++i) {
