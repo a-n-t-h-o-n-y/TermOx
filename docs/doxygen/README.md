@@ -42,7 +42,9 @@ it is merged, change the workflow's push branch and both deployment conditions t
 ## Inline documentation
 
 The initial configuration extracts public declarations even when their comments
-are incomplete, and excludes private members and `ox::detail`. It treats malformed
+are incomplete, and excludes private members. Shared implementation bases are
+parsed so public classes retain their inherited methods, options, and signals;
+inherited members are listed directly on each public class page. It treats malformed
 comments and parameter mismatches as build failures; diagnostics are written to
 `build/docs/warnings.log`. Missing descriptions are not yet failures. Once public
 API comments are complete, turn off `EXTRACT_ALL` and enable undocumented-member

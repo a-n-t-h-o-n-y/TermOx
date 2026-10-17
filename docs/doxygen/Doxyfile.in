@@ -6,8 +6,6 @@ INPUT                  = "@TERMOX_SOURCE_DIR@/include/ox" \
                          "@TERMOX_DOC_SOURCE@/mainpage.md"
 RECURSIVE              = YES
 FILE_PATTERNS          = *.hpp *.md
-EXCLUDE_PATTERNS       = */detail/*
-EXCLUDE_SYMBOLS        = ox::detail ox::detail::*
 STRIP_FROM_PATH        = "@TERMOX_SOURCE_DIR@/include/"
 STRIP_FROM_INC_PATH    = "@TERMOX_SOURCE_DIR@/include/"
 USE_MDFILE_AS_MAINPAGE  = "@TERMOX_DOC_SOURCE@/mainpage.md"
@@ -25,6 +23,7 @@ EXTRACT_STATIC         = NO
 INTERNAL_DOCS          = NO
 HIDE_UNDOC_MEMBERS     = NO
 HIDE_UNDOC_CLASSES     = NO
+INLINE_INHERITED_MEMB  = YES
 SHOW_INCLUDE_FILES     = YES
 FULL_PATH_NAMES        = NO
 SORT_MEMBER_DOCS       = NO

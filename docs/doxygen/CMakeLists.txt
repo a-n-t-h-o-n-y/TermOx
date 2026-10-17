@@ -35,6 +35,7 @@ file(WRITE "${TERMOX_DOC_OUTPUT}/header.html" "${header}")
 configure_file(Doxyfile.in "${TERMOX_DOC_OUTPUT}/Doxyfile" @ONLY)
 
 add_custom_target(TermOx.docs
+    COMMAND "${CMAKE_COMMAND}" -E remove_directory "${TERMOX_DOC_OUTPUT}/html"
     COMMAND "${DOXYGEN_EXECUTABLE}" "${TERMOX_DOC_OUTPUT}/Doxyfile"
     WORKING_DIRECTORY "${TERMOX_SOURCE_DIR}"
     COMMENT "Generating TermOx ${TERMOX_DOC_VERSION} API reference"
