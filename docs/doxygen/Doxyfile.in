@@ -38,6 +38,8 @@ HTML_EXTRA_STYLESHEET  = "@TERMOX_DOC_THEME@/doxygen-awesome.css" \
 HTML_EXTRA_FILES       = "@TERMOX_DOC_THEME@/doxygen-awesome-darkmode-toggle.js"
 HTML_COLORSTYLE        = LIGHT
 GENERATE_TREEVIEW      = YES
+# Static menus avoid Doxygen 1.18's inconsistent alphabetical jump anchors.
+HTML_DYNAMIC_MENUS     = NO
 DISABLE_INDEX          = NO
 FULL_SIDEBAR           = NO
 PAGE_OUTLINE_PANEL     = NO

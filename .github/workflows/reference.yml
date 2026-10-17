@@ -30,6 +30,8 @@ jobs:
         run: cmake -S docs/doxygen -B build/docs
       - name: Build reference
         run: cmake --build build/docs --target TermOx.docs
+      - name: Check reference links
+        run: python3 tests/check_reference.py build/docs/html
       - name: Upload build for inspection
         uses: actions/upload-artifact@v7
         with:

@@ -18,3 +18,11 @@ html.dark-mode {
     --page-foreground-color: #e8e6db;
     --side-nav-background: #1f2924;
 }
+
+/* The sidebar replaces desktop menu rows; static menus retain empty row borders. */
+@media screen and (min-width: 768px) {
+    #main-nav > .tabs2,
+    #main-nav > .tabs3 {
+        display: none;
+    }
+}
