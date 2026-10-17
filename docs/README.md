@@ -9,7 +9,6 @@ The guides below explain how those interfaces work together.
 | Start with | What it covers |
 | --- | --- |
 | [Getting Started](getting_started.md) | Build the counter, connect a signal, and use TermOx from CMake |
-| [Table walkthrough](../examples/datatable.md) | Lay out a table, sort columns, link a scrollbar, and handle activation |
 | [Examples index](../examples/README.md) | Source files, build targets, demos, and games |
 
 ## Widgets and layout

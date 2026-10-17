@@ -56,6 +56,5 @@ in your own project.
 - [Guides](docs/README.md): layout, input, styling, custom widgets, and internals.
 - [API reference](docs/reference.md): interfaces and their headers.
 - [Examples](examples/README.md): runnable programs, build targets, and walkthroughs.
-- [Table walkthrough](examples/datatable.md): sorting, scrolling, and responding to selection.
 
 Contributions are welcome. TermOx is released under the [MIT license](LICENSE).

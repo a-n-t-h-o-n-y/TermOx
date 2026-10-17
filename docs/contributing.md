@@ -20,7 +20,7 @@ On macOS or Linux, check interactive input and terminal restoration with:
 cmake --build build --target TermOx.tests.renderer_terminal TermOx.tests.event_loop_terminal \
     TermOx.examples.pong TermOx.examples.pinbox \
     TermOx.examples.snake TermOx.examples.accumulator \
-    TermOx.examples.datatable TermOx.examples.views TermOx.examples.selection \
+    TermOx.examples.views TermOx.examples.selection \
     TermOx.examples.bmp_view
 python3 tests/smoke_examples.py build
 ```
@@ -33,7 +33,7 @@ walkthrough changes, and check its keyboard and mouse instructions in a terminal
 Use relative links so the documentation works in a checkout and on GitHub.
 
 Screenshots should come from the current code. The README's table image is a
-rendering of the example's headless frame, with a dark background and monospace
+rendering of a painted DataTable frame, with a dark background and monospace
 font. Other images are stored in `docs/img/`.
 
 ## Documentation layout

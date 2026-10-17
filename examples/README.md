@@ -4,8 +4,8 @@ Configure the project using [Getting Started](../docs/getting_started.md). Build
 an example by its target name, then run the executable from `build/examples/`:
 
 ```sh
-cmake --build build --target TermOx.examples.datatable
-./build/examples/TermOx.examples.datatable
+cmake --build build --target TermOx.examples.showcase
+./build/examples/TermOx.examples.showcase
 ```
 
 Examples are excluded from the default build. Ctrl-C exits interactive programs.
@@ -17,16 +17,13 @@ With a multi-configuration generator, build with `--config Release` and run from
 | Program | What it shows | Read alongside it |
 | --- | --- | --- |
 | [counter.cpp](counter.cpp) | Layout ownership, button activation, a tracked connection | [Getting Started](../docs/getting_started.md#read-the-counter) |
-| [datatable.cpp](datatable.cpp) | Sorting, row activation, linked scrolling | [Table walkthrough](datatable.md) |
 
-Targets are `TermOx.examples.counter` and `TermOx.examples.datatable`,
-respectively.
+The target is `TermOx.examples.counter`.
 
 ## More programs
 
 The target for each source below is `TermOx.examples.<filename without .cpp>`.
-The linked guides describe the relevant APIs; only the table example above has
-a step-by-step application walkthrough.
+The linked guides describe the relevant APIs.
 
 | Source | Purpose | Related guide |
 | --- | --- | --- |

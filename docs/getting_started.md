@@ -115,8 +115,8 @@ package for `find_package(TermOx)`.
 
 ## Next program
 
-The [table walkthrough](../examples/datatable.md) adds a scrollbar, sortable
-columns, and a status line. Use the [reference](reference.md) to look up an
+The [showcase](theme-and-motion.md#showcase) combines controls, tables, text
+editing, and file selection. Use the [reference](reference.md) to look up an
 interface, or the [guides index](README.md) for a topic.
 
 For tests and terminal smoke checks, see [contributing](contributing.md).

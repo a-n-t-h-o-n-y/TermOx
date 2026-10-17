@@ -51,8 +51,8 @@ and stable sorting. Columns compose SizePolicy, Align, and StylePatch. Data acce
 through const spans; mutation functions validate shape and UTF-8 before committing.
 
 See [data tables and scrolling](../data-tables.md) for the complete API, examples,
-callbacks, sorting/filtering, and viewport rules. The interactive example
-is [examples/datatable.cpp](../../examples/datatable.cpp).
+callbacks, sorting/filtering, and viewport rules. The Data page in the
+[showcase](../theme-and-motion.md#showcase) includes a table with linked scrolling.
 
 ## ox::ScrollBar
 

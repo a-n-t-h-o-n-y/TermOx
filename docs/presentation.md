@@ -99,8 +99,8 @@ row remains selected through sorting. Replacing data, inserting a row or modifyi
 the sorted column clears the indicator; erasing rows or changing another column
 preserves it. Comparators that throw preserve the previous model/order. Header clicks
 still emit `on_header`; the application chooses whether/how to sort. Unicode markers
-become `^`/`v` in the ASCII theme. The [table walkthrough](../examples/datatable.md#sort-when-a-heading-is-clicked)
-explains numeric sorting.
+become `^`/`v` in the ASCII theme. See [data tables](data-tables.md#selection-and-sorting)
+for sorting behavior and custom comparators.
 
 ```cpp
 auto table = ox::DataTable{{.columns = {{"Project"}, {"Status"}},
