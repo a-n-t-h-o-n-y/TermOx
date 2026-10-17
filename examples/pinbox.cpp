@@ -80,22 +80,28 @@ class PinBox : public Widget {
     Color current_color_ = colors::bright_blue;
 };
 
-class ColorSelect : public Row<std::vector<Button>> {
+using ColorRow = Row<std::vector<Button>>;
+class ColorSelect : public Column<std::vector<ColorRow>> {
    public:
     sl::Signal<void(Color)> on_select;
 
    public:
     ColorSelect(std::vector<Color> colors = {})
     {
-        height_policy = SizePolicy::fixed(1);
+        height_policy = SizePolicy::fixed(2);
         for (auto const color : colors) {
-            children.push_back({{.label = {.text = "  ",
+            if (children.empty() || children.back().children.size() == 4) {
+                children.emplace_back();
+                children.back().height_policy = SizePolicy::fixed(1);
+            }
+            auto& row = children.back();
+            row.children.push_back({{.label = {.text = "  ",
                                            .style = {.background = color}},
                                  .decoration = [color](Canvas canvas) {
                                      fill(canvas, Style{.background = color});
                                  }}});
             Connection{
-                .signal = children.back().on_activate,
+                .signal = row.children.back().on_activate,
                 .slot = [color](auto& parent) { parent.on_select(color); }}(*this);
         }
     }
@@ -230,11 +236,13 @@ int main(int argc, char** argv)
         };
         if (!has_text(U"Color Select") || !has_text(U"Last Action") ||
             !has_text(U"Pin Count")) return 7;
-        for (auto& button : color_select.children) {
-            auto frame = Frame{button.size()};
-            button.paint(Canvas{frame});
-            if (frame[{0, 0}].style.background != button.label.style.background) return 3;
-        }
+        for (auto& row : color_select.children)
+            for (auto& button : row.children) {
+                auto frame = Frame{button.size()};
+                button.paint(Canvas{frame});
+                if (frame[{0, 0}].style.background != button.label.style.background)
+                    return 3;
+            }
         pinbox.handle(MousePress{.at = {3, 4}, .button = MouseButton::Left});
         if (status.text != "Added (3, 4)" || count.value != 1) return 4;
         pinbox.handle(MousePress{.at = {3, 4}, .button = MouseButton::Right});
