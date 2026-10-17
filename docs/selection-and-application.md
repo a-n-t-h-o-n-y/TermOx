@@ -170,6 +170,5 @@ Left/Right moves across the bar and switches top-level menus while open. `open(i
 and content. `on_trigger` prepends the bar menu index to the item's path. Closing resets
 submenus so reopening begins at the top level.
 
-Run [examples/selection.cpp](../examples/selection.cpp) for lists, dropdowns, editable
-choices, radio groups, tabs, nested menus, and a modal dialog. Tab navigates controls,
-Ctrl-Tab switches pages, F4 opens a combo, Alt-F opens File, and Ctrl-C exits.
+The [showcase](theme-and-motion.md#showcase) includes lists, dropdowns, editable
+choices, radio groups, tabs, menus, and dialogs.

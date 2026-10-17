@@ -20,16 +20,14 @@ On macOS or Linux, check interactive input and terminal restoration with:
 cmake --build build --target TermOx.tests.renderer_terminal TermOx.tests.event_loop_terminal \
     TermOx.examples.pong TermOx.examples.pinbox \
     TermOx.examples.snake TermOx.examples.accumulator \
-    TermOx.examples.views TermOx.examples.selection \
     TermOx.examples.bmp_view
 python3 tests/smoke_examples.py build
 ```
 
 ## Documentation changes
 
-Keep the README example identical to [counter.cpp](../examples/counter.cpp) so it
-can be compiled as part of the normal examples build. Build any example whose
-walkthrough changes, and check its keyboard and mouse instructions in a terminal.
+Compile the README code block when changing it. Build any app whose walkthrough
+changes, and check its keyboard and mouse instructions in a terminal.
 Use relative links so the documentation works in a checkout and on GitHub.
 
 Screenshots should come from the current code. The README's table image is a

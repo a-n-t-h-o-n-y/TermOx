@@ -230,6 +230,5 @@ from `on_execute` if desired. No implicit global shortcut or application state i
 
 ## Demo
 
-Build `TermOx.examples.views` and run it. Its tabs show values/status, tree/log panes,
-form validation, filesystem browsing, and command search. Tab changes focus, Ctrl-Tab
-switches pages, Ctrl-Enter submits a form, and Ctrl-C exits.
+The [showcase](theme-and-motion.md#showcase) includes values, tree/log panes,
+form validation, filesystem browsing, and command search.

@@ -35,7 +35,7 @@ int main()
 The layout owns the widgets. The connection passes the live label to the callback;
 `set_value()` updates it and requests a repaint.
 
-## Build and run
+## Build and run the showcase
 
 You need Git, CMake 3.18 or newer, and a C++20 compiler and standard library with
 `std::format` support. CMake fetches the dependencies on the first configure.
@@ -44,8 +44,8 @@ You need Git, CMake 3.18 or newer, and a C++20 compiler and standard library wit
 git clone https://github.com/a-n-t-h-o-n-y/TermOx.git
 cd TermOx
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --target TermOx.examples.counter
-./build/examples/TermOx.examples.counter
+cmake --build build --target TermOx.examples.showcase
+./build/examples/TermOx.examples.showcase
 ```
 
 See [Getting Started](docs/getting_started.md) for build details and using TermOx
