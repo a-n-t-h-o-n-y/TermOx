@@ -46,8 +46,8 @@ Recorded October 13, 2026 on macOS x86_64 with Clang 22.1.2, libc++ 22, and Rele
 `-O3 -DNDEBUG`, without LTO or sanitizers. The baseline uses the text and application
 implementation from `e16f976`; both executables use the same benchmark source and
 unchanged dependencies and library components. All workload checksums match.
-Raw results: [before](../tests/benchmark-results/before.csv) and
-[after](../tests/benchmark-results/after.csv).
+Raw results: [before](../../tests/benchmark-results/before.csv) and
+[after](../../tests/benchmark-results/after.csv).
 
 TextLayout now records byte-boundary coordinates during layout construction and uses
 binary searches for caret and hit testing. Coordinate storage adds `sizeof(Point)`
@@ -106,8 +106,8 @@ The routing-only command runs the expanded workload set:
 This pass compares `244379a` against the optimized routing code, with the same
 expanded benchmark source, compiler, flags, and dependencies described above.
 The baseline executable was saved before changing the library. Every workload checksum
-matches. Raw results: [routing before](../tests/benchmark-results/routing-before.csv)
-and [routing after](../tests/benchmark-results/routing-after.csv).
+matches. Raw results: [routing before](../../tests/benchmark-results/routing-before.csv)
+and [routing after](../../tests/benchmark-results/routing-after.csv).
 
 | Workload | Before µs | After µs |
 | --- | ---: | ---: |
@@ -170,8 +170,8 @@ sample; aligned allocation and external `malloc` calls are not counted. This cou
 is confined to the single-threaded benchmark executable. Both versions include it,
 and setup, warmups, and measurement storage are excluded from the counts.
 
-Every workload checksum matches. Raw results: [editing before](../tests/benchmark-results/editing-before.csv)
-and [editing after](../tests/benchmark-results/editing-after.csv).
+Every workload checksum matches. Raw results: [editing before](../../tests/benchmark-results/editing-before.csv)
+and [editing after](../../tests/benchmark-results/editing-after.csv).
 
 | Workload | Before µs | After µs | Before allocations/op | After allocations/op |
 | --- | ---: | ---: | ---: | ---: |
@@ -238,8 +238,8 @@ Run the layout-only workloads with:
 This pass compares `64b8719` against the optimized layout code using the same expanded
 benchmark source, Release toolchain, flags, and dependencies. The baseline executable
 was saved before changing the library. Every workload checksum matches. Raw results:
-[layout before](../tests/benchmark-results/layout-before.csv) and
-[layout after](../tests/benchmark-results/layout-after.csv).
+[layout before](../../tests/benchmark-results/layout-before.csv) and
+[layout after](../../tests/benchmark-results/layout-after.csv).
 
 | Workload | Before µs | After µs | Before allocations/op | After allocations/op |
 | --- | ---: | ---: | ---: | ---: |
@@ -318,7 +318,7 @@ records loop iterations and post-to-callback latency. Five samples alternate dri
 Iterations include initial dispatch and exit dispatch. Escape's default 100 ms resize
 checks remain enabled, so an idle terminal still wakes about ten times per second.
 This measures one-second idle samples and scheduler-dependent latency, not CPU usage.
-Raw results: [waiting](../tests/benchmark-results/waiting.csv).
+Raw results: [waiting](../../tests/benchmark-results/waiting.csv).
 
 ```sh
 cmake --build build-release --target TermOx.tests.event_loop_terminal -j 4
@@ -351,8 +351,8 @@ the full-frame workload includes clearing to alternating styles and rendering.
 | renderer.clear-paint.200x60 | 108.868 | 116.236 |
 | renderer.full-frame.200x60 | 679.695 | 731.611 |
 
-Raw results: [rendering before](../tests/benchmark-results/rendering-before.csv) and
-[rendering after](../tests/benchmark-results/rendering-after.csv).
+Raw results: [rendering before](../../tests/benchmark-results/rendering-before.csv) and
+[rendering after](../../tests/benchmark-results/rendering-after.csv).
 
 Unchanged retained frames are 280–943 times faster in these workloads, and single-cell
 updates including mutation are 10.7–30.6 times faster. Clear-and-paint is 7–15% slower;
@@ -404,13 +404,13 @@ must contain the same benchmark source; for this baseline the expanded
 `tests/benchmarks.cpp` was built against the library at `e49f72b`. No builds, tests,
 or sanitizer processes ran during the recorded measurements.
 
-Raw process samples: [all samples](../tests/benchmark-results/paint-pipeline-samples.csv).
-Aggregate CSVs: [renderer before](../tests/benchmark-results/paint-pipeline-renderer-before.csv),
-[renderer after](../tests/benchmark-results/paint-pipeline-renderer-after.csv),
-[phases before](../tests/benchmark-results/paint-pipeline-paint-before.csv),
-[phases after](../tests/benchmark-results/paint-pipeline-paint-after.csv),
-[application before](../tests/benchmark-results/paint-pipeline-application-before.csv),
-[application after](../tests/benchmark-results/paint-pipeline-application-after.csv).
+Raw process samples: [all samples](../../tests/benchmark-results/paint-pipeline-samples.csv).
+Aggregate CSVs: [renderer before](../../tests/benchmark-results/paint-pipeline-renderer-before.csv),
+[renderer after](../../tests/benchmark-results/paint-pipeline-renderer-after.csv),
+[phases before](../../tests/benchmark-results/paint-pipeline-paint-before.csv),
+[phases after](../../tests/benchmark-results/paint-pipeline-paint-after.csv),
+[application before](../../tests/benchmark-results/paint-pipeline-application-before.csv),
+[application after](../../tests/benchmark-results/paint-pipeline-application-after.csv).
 
 ### Rendering and paint phases
 
@@ -432,9 +432,9 @@ the identical renderer workloads. Clear-paint is 17.798 → 17.648 µs at 80×24
 107.624 → 102.118 µs at 200×60; full-frame styles are 108.323 → 82.884 µs and
 672.584 → 509.497 µs. This brings clear-paint back to roughly its pre-revision cost
 and improves full-frame encoding while retaining the sparse-update gains. Raw results:
-[pre-revision baseline](../tests/benchmark-results/paint-pipeline-renderer-pre-revisions.csv),
-[current control](../tests/benchmark-results/paint-pipeline-renderer-reference-after.csv),
-[control samples](../tests/benchmark-results/paint-pipeline-renderer-reference-samples.csv).
+[pre-revision baseline](../../tests/benchmark-results/paint-pipeline-renderer-pre-revisions.csv),
+[current control](../../tests/benchmark-results/paint-pipeline-renderer-reference-after.csv),
+[control samples](../../tests/benchmark-results/paint-pipeline-renderer-reference-samples.csv).
 The same harness reproduces this control with `--modes renderer`.
 
 | Workload | 80×24 before µs | After µs | 200×60 before µs | After µs |
@@ -520,9 +520,9 @@ python3 tests/benchmark_paint_pipeline.py /path/to/before-benchmarks \
     ./build-release/tests/TermOx.tests.benchmarks /tmp/text-view-results --modes application
 ```
 
-Raw results: [before](../tests/benchmark-results/text-view-application-before.csv),
-[after](../tests/benchmark-results/text-view-application-after.csv), and
-[process samples](../tests/benchmark-results/text-view-samples.csv).
+Raw results: [before](../../tests/benchmark-results/text-view-application-before.csv),
+[after](../../tests/benchmark-results/text-view-application-after.csv), and
+[process samples](../../tests/benchmark-results/text-view-samples.csv).
 
 | Workload | 80×24 before µs | After µs | 200×60 before µs | After µs |
 | --- | ---: | ---: | ---: | ---: |
@@ -544,7 +544,7 @@ strings, frame cells own their text, initial layout/frame construction allocates
 application snapshots intentionally retain callback safety. Text changes still rebuild
 layout analysis and remain a substantial part of editing-frame cost.
 
-See [text view composition](text-editing.md#text-view-composition) for the interface,
+See [text view composition](text.md#text-view-composition) for the interface,
 including selection, alignment, hit testing, input filtering, and ownership rules.
 A differential comparison against the previous row painter matches 9,720 combinations
 of Unicode text, wrap modes, widths, policies, selection ranges, and canvas clipping.
@@ -569,11 +569,11 @@ python3 tests/benchmark_paint_pipeline.py /path/to/before-benchmarks \
     --modes layout application
 ```
 
-Raw results: [layout before](../tests/benchmark-results/incremental-layout-before.csv),
-[layout after](../tests/benchmark-results/incremental-layout-after.csv),
-[application before](../tests/benchmark-results/incremental-application-before.csv),
-[application after](../tests/benchmark-results/incremental-application-after.csv), and
-[process samples](../tests/benchmark-results/incremental-samples.csv).
+Raw results: [layout before](../../tests/benchmark-results/incremental-layout-before.csv),
+[layout after](../../tests/benchmark-results/incremental-layout-after.csv),
+[application before](../../tests/benchmark-results/incremental-application-before.csv),
+[application after](../../tests/benchmark-results/incremental-application-after.csv), and
+[process samples](../../tests/benchmark-results/incremental-samples.csv).
 
 | Workload | Before µs | After µs | Speedup |
 | --- | ---: | ---: | ---: |
@@ -603,7 +603,7 @@ analysis. The raw samples are retained, and no general repaint speedup is claime
 Controls use shared activation/selection functions and explicit state, with no duplicate
 focus state or temporary Label widgets. Styled string/span drawing avoids intermediate
 label glyph vectors and copies solely for focus styling. Control-specific speedups are
-not measured here; see [control composition](controls.md) for the interface changes.
+not measured here; see [control composition](../controls.md) for the interface changes.
 
 Validation passes all 171 Release cases, including five allocation-fault cases, all six
 example builds, seven PTY smoke checks, and 9,720 cached-painter differential comparisons.
@@ -628,8 +628,8 @@ the previous unfinished table.
 Run `TermOx.tests.benchmarks --table` in Release. The reported values are medians of
 three fresh processes, each with ten warmups and five timed samples of 100 operations.
 No builds, tests, or sanitizer work ran during measurement. Workload/iteration/checksum
-triples match in all processes. Raw [medians](../tests/benchmark-results/table-viewport.csv)
-and [process samples](../tests/benchmark-results/table-viewport-samples.csv) are retained.
+triples match in all processes. Raw [medians](../../tests/benchmark-results/table-viewport.csv)
+and [process samples](../../tests/benchmark-results/table-viewport-samples.csv) are retained.
 
 | Rows | Repaint µs | Scroll + repaint µs | Application repaint + encoding µs |
 | --- | ---: | ---: | ---: |
@@ -644,7 +644,7 @@ long grapheme strings, schema changes, data validation, or sorting. Tables own t
 construction and memory use grow with row count. Stable sorting orders indices first,
 reserves the new row vector, and then moves row vectors without copying cell strings.
 
-See [data tables and scrolling](data-tables.md) for viewport functions, table ownership,
+See [data tables and scrolling](../data-tables.md) for viewport functions, table ownership,
 selection/sorting, Unicode clipping, and linked scrollbar behavior.
 
 Validation passes all 186 Release cases, including six allocation-fault cases; seven
@@ -673,7 +673,7 @@ layout hooks. Reentrant changes cause a new plan; unchanged requests settle. Tup
 enumeration uses one coroutine frame instead of two forwarding frames.
 
 The comparison uses `145427f` as baseline and the standalone workloads in
-[tests/arrangement_benchmarks.cpp](../tests/arrangement_benchmarks.cpp). Both use the same
+[tests/arrangement_benchmarks.cpp](../../tests/arrangement_benchmarks.cpp). Both use the same
 Release compiler/options, ten warmups, five timed samples of 100 operations, and three
 alternating processes per version. No builds, tests, or sanitizer work ran during
 measurement. Workload/iteration/checksum triples match. Timings include a scan of the
@@ -687,9 +687,9 @@ python3 tests/benchmark_paint_pipeline.py /path/to/before-arrangement-benchmarks
 ```
 
 Compile the standalone workload against each revision for a comparison. Raw
-[before](../tests/benchmark-results/arrangement-before.csv),
-[after](../tests/benchmark-results/arrangement-after.csv), and
-[process samples](../tests/benchmark-results/arrangement-samples.csv) are retained.
+[before](../../tests/benchmark-results/arrangement-before.csv),
+[after](../../tests/benchmark-results/arrangement-after.csv), and
+[process samples](../../tests/benchmark-results/arrangement-samples.csv) are retained.
 
 | Workload | Children | Before µs | After µs |
 | --- | ---: | ---: | ---: |
@@ -707,7 +707,7 @@ five calls instead of sixteen. Large geometry changes are effectively unchanged 
 run the core allocation/rounding algorithm; custom child hooks and nested layouts can
 allocate independently. This does not promise allocation-free application resize.
 
-See [decorations and layouts](decorations-layouts.md) for drawing, geometry, mutation,
+See [decorations and layouts](../decorations.md) for drawing, geometry, mutation,
 and callback safety.
 
 Validation passes all 200 Release cases, including seven allocation-fault cases;
@@ -732,7 +732,7 @@ odd final rows and inherited clips retain the same native two-pixels-per-cell ma
 
 The comparison isolates the PixelGrid implementation at `e3be782` against the new
 implementation, using the current core for both. The standalone workload is
-[tests/pixel_benchmarks.cpp](../tests/pixel_benchmarks.cpp). Both binaries use Clang/libc++22,
+[tests/pixel_benchmarks.cpp](../../tests/pixel_benchmarks.cpp). Both binaries use Clang/libc++22,
 Release `-O3 -DNDEBUG`, no LTO/sanitizers, three warmups, five samples of twenty paints,
 and three alternating processes per version. No builds or tests ran during timing.
 Checksums match across every process. Timing includes scanning the physical 80×24
@@ -755,9 +755,9 @@ python3 tests/benchmark_paint_pipeline.py /path/to/before-pixel-benchmarks \
     ./build-release/tests/TermOx.tests.pixel_benchmarks /tmp/pixel-results --modes pixels
 ```
 
-Raw [before](../tests/benchmark-results/pixels-before.csv),
-[after](../tests/benchmark-results/pixels-after.csv), and
-[process samples](../tests/benchmark-results/pixels-samples.csv) are retained.
+Raw [before](../../tests/benchmark-results/pixels-before.csv),
+[after](../../tests/benchmark-results/pixels-after.csv), and
+[process samples](../../tests/benchmark-results/pixels-samples.csv) are retained.
 
 Validation passes 212 Release cases, including eight allocation-fault cases, all
 seven example builds, and nine PTY smoke checks. Pixel coverage includes checked
@@ -767,7 +767,7 @@ rollback. BMP fixtures cover all supported depths, row orientation/padding, pale
 bounds, bitfield normalization, invalid headers/masks, and every truncated prefix.
 ASan+UBSan passes 116 non-exception cases with every TermOx source instrumented.
 Intentional exception tests run in Release because the installed sanitizer runtime
-cannot unwind C++ exceptions. See [PixelGrid](reference/drawing.md#oxpixelgrid) for the API.
+cannot unwind C++ exceptions. See [PixelGrid](../reference/drawing.md#oxpixelgrid) for the API.
 
 ## Streaming logs, trees, and command searches
 
@@ -821,9 +821,9 @@ allocations from 130,049 to 20,049. The small painting timing difference is inci
 its implementation was not optimized. These are workload-specific gains, not an
 overall application speedup.
 
-Raw [before](../tests/benchmark-results/views-before.csv),
-[after](../tests/benchmark-results/views-after.csv), and
-[process samples](../tests/benchmark-results/views-samples.csv) include both sizes.
+Raw [before](../../tests/benchmark-results/views-before.csv),
+[after](../../tests/benchmark-results/views-after.csv), and
+[process samples](../../tests/benchmark-results/views-samples.csv) include both sizes.
 
 Validation passes 343 unit cases and nine isolated allocation-fault cases, with all
 examples rebuilt, 13 PTY smoke checks, and the showcase structural checks. ASan+UBSan

@@ -34,9 +34,7 @@ int main()
 - [Text and clipping](#text-and-clipping)
 - [Keyboard and mouse input](#keyboard-and-mouse-input)
 - [Signals](#signals)
-- [Shared scrolling functions](#shared-scrolling-functions)
-- [ScrollBar](#scrollbar)
-- [Linking a scrollbar](#linking-a-scrollbar)
+- [Scrolling](#scrolling)
 
 ## Columns
 
@@ -45,8 +43,8 @@ one padding cell on each side. Optional column separators consume one extra cell
 Minimum widths are preserved, allowing horizontal scrolling when they do not fit.
 Otherwise `distribute_length` allocates available space using the existing bounds and
 weights. Fixed-width columns do not grow. A viewport wider than all maximums leaves
-unused background to the right. Headers take two rows (text and divider); body rows
-take one. Wrap a table in Bordered when an outer border is wanted.
+unused background to the right. By default, headers take two rows (text and divider) and body rows take one;
+[presentation options](presentation.md#datatable) control separators, padding, and row height. Wrap a table in Bordered when an outer border is wanted.
 
 ## Rows and updates
 
@@ -76,8 +74,8 @@ Cells reuse TextLayout and put_text_line with the canvas width policy. Combining
 wide characters, emoji, and orphan marks keep their complete display footprints. Text
 that exceeds a cell is clipped at grapheme boundaries, reserving terminal columns for an
 ellipsis. Right/center alignment applies when the entire text fits. Narrow viewports and
-inherited clips never draw half a wide glyph. Styles compose table, column, alternating
-row, and selected-row appearance; headers apply header_style after the column patch.
+inherited clips never draw half a wide glyph. For cell/header patch order and density options, see
+[table presentation](presentation.md#datatable).
 
 ## Keyboard and mouse input
 
@@ -99,43 +97,9 @@ content extent, and viewport extent only when those values change, including on 
 and row-count changes. select and set_scroll_offset return whether visible state changed.
 Selecting an invalid row returns false; scrolling clamps to the last full viewport.
 
-## Shared scrolling functions
+## Scrolling
 
-`<ox/scroll.hpp>` contains pure integer functions, with no widgets, signals, or ownership:
-
-- scroll_limit(content, viewport) and clamp_scroll(position, content, viewport).
-- scroll_by(position, delta, content, viewport), with safe signed arithmetic.
-- scroll_to_show(position, first, length, content, viewport) to reveal a range.
-- scrollbar_thumb(position, content, viewport, track), returning {offset, length}.
-- scrollbar_position(cell, content, viewport, track), mapping a centered-thumb click.
-
-Lengths must be nonnegative; positions and deltas can be any int. Empty content occupies
-the full scrollbar track. A zero-sized track has no thumb; scrollable content has a thumb
-of at least one cell. An oversized reveal range aligns its beginning, an empty range does
-nothing, and a zero-sized viewport cannot reveal anything. Products and sums use wider
-arithmetic. The same functions drive DataTable, ScrollBar, and vertical text view scrolling.
-
-## ScrollBar
-
-ScrollBar exposes content_length(), viewport_length(), and position() getters,
-with public vertical/style configuration.
-set_position clamps, schedules paint, and emits on_scroll(int) only on change.
-set_range(content, viewport, position) synchronizes without emitting, avoiding feedback
-loops. Painting is passive. Wheel steps use content units; clicks center the thumb.
-Scrolling always commits immediately and emits `on_scroll` once per changed position.
-Set `scroll_settle_time` to a positive duration to animate the thumb toward that
-position; animation frames do not change content or emit scroll signals. Nonpositive
-durations disable thumb motion. A range change cancels animation; feedback of an
-unchanged position/range preserves it. Grabbing a moving thumb stops it at its
-displayed position and begins direct dragging.
-
-## Linking a scrollbar
-
-`link(table, bar)` initializes and synchronizes the selected axis in both directions;
-choose bar.vertical before linking. The connection tracks both widgets across moves and
-ignores destroyed targets. Link once per axis. TextBox links support either axis; on_scroll(Point, Area, Area) reports
-offset, content size, and viewport size. Links return both signal identifiers. Arrange controls through their
-parent layout normally; resizing updates the linked ranges even without a paint.
-
-The Data page in the [showcase](theme-and-motion.md#showcase) combines a table,
-filtering, header sorting, and linked scrolling.
+For scrollbar connections, thumb motion, and custom scrollable widgets, use
+[Link scrolling](scrolling.md). Table offsets use display columns and rows, including
+row spacing and separator cells. The Data page in the
+[Showcase](../examples/showcase.md) combines filtering, header sorting, and linked scrolling.

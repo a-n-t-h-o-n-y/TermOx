@@ -69,22 +69,46 @@ from a child's layout callback propagate; earlier callbacks are not rolled back.
 
 `centered_rect(available, requested)` clamps the requested width and height to the
 available area, then centers the result. Odd spare cells remain at the right or bottom.
-`Suspended` uses this function and takes its requested size explicitly:
+`Suspended` uses an explicit requested size rather than consulting the child's size
+policy; [the container guide](../containers.md#suspended) shows its use.
 
-```cpp
-auto panel = ox::Suspended{ox::TextBox{}, ox::Area{40, 5}};
-panel.requested_size = {30, 8};
-```
+## Refresh and callback mutations
 
-A child's one-dimensional size policy is not consulted by `Suspended`; the layout's own policy still controls
-how its parent allocates space to it.
+Row and Column share one implementation over the caller's tuple or sized forward
+range. [Container composition](../containers.md#row-and-column) describes ownership
+and child access.
 
-Tests cover exact fits, shortage, weighted growth, caps, unused space, rounding,
-invalid input, extreme dimensions and weights, randomized allocation invariants,
-and both tuple and dynamic widget layouts. Nested layouts and explicit centered
-sizes are checked separately from the terminal-free calculation tests.
+The public refresh workflow is described in [Layout and containers](../containers.md#changing-a-layout).
+`arrange(layout, bounds)` also always refreshes descendants, even when the bounds have
+not changed. Refresh the layout whose children changed; a refresh from outside arrangement
+can also start at an ancestor to propagate through nested layouts. Public field edits do
+not observe themselves automatically.
 
-Change `Suspended::requested_size` and call `refresh()` to recompute the child geometry
-without changing parent bounds. Invalid requested dimensions leave child geometry intact.
-Its margins compose `fill_outside(Canvas, Rect, Glyph)`, which can also be used directly
-with parent-local content rectangles and inherited Canvas clips.
+Arrangement collects visible children without allocating a coroutine. Policies and
+private identity slots use reusable vectors. Slots follow moves and clear on destruction
+without owning widgets. Membership comparisons avoid copying handles or locking weak
+pointers when membership is unchanged. If available size and policies match the
+last successful computation, rectangles are reused; every live visible child still gets
+its arrangement hook. When geometry/policies change, the existing layout_row/layout_column
+functions compute a fresh validated plan before child hooks run. Growth, shrinking, caps,
+weights, and deterministic rounding retain the core layout algorithm.
+
+Hooks can relocate children through vector growth/removal, move or destroy the parent,
+or request another refresh. A refresh during an active pass is deferred. If membership,
+visibility, policies, or size changed, the old plan is discarded and the new plan applied;
+redundant unchanged requests settle without recursive arrangement. Callback mutations
+also get checked at the end of the pass. Use refresh after removing a still-live child
+into another container to discard its old pending arrangement. Mutation callbacks must
+settle rather than continually alter their own layout constraints. Changes to nested
+containers during a hook should refresh that nested layout directly.
+
+Identity slots are resolved after each callback; no raw child pointer survives into
+the next hook. Exceptions reset the arrangement state, allowing a later refresh to recover.
+Validation/allocation failures while constructing the plan leave child geometry unchanged.
+A throwing child hook can leave an already-applied prefix of child geometry, as with
+ordinary arrange. The parent's bounds are updated before its hook is invoked.
+
+Borrowed child enumeration uses one coroutine frame rather than nested forwarding
+coroutines for tuple children. Keep the container stable while iterating that borrowed
+range. Arrangement itself does not use the borrowed generator.
+

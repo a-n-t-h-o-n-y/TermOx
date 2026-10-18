@@ -169,7 +169,7 @@ Tab Focus.
 `Focus(root)` manages one tree and returns transition effects without applying them.
 `app.set_focus(widget)` and `app.clear_focus()` apply those effects at the application
 boundary. `app.focus().get()` returns a lifetime view; `Widget::is_focused()` reads
-focus state. See [routing and focus](../routing-and-focus.md).
+focus state. See [routing and focus](../internals/routing-and-focus.md).
 
 ## Routing and focus
 
@@ -181,7 +181,7 @@ and input eligibility. `hit_path(tree, point)` returns mouse ancestry;
 selection for one tree. Widget input, hover, focus, and timer callbacks return
 `EventResponse`; mouse and keyboard input bubble until handled or quitting.
 
-See [routing and focus](../routing-and-focus.md) for ownership, hover transitions,
+See [routing and focus](../internals/routing-and-focus.md) for ownership, hover transitions,
 Tab behavior and callback mutations.
 
 ## ox::Timer

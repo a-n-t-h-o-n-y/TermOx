@@ -80,7 +80,7 @@ firings need enough ticks/interval to fall within the sample window.
 There is **no terminal output or terminal-emulator cost** in these timings. Live
 performance also depends on terminal size, color support, font and emulator. Headless
 samples are diagnostic, not statistically controlled before/after speedup claims;
-use the [recorded benchmark workflow](../docs/performance.md) for those comparisons.
+use the [recorded benchmark workflow](../docs/internals/performance.md) for those comparisons.
 
 `--check` exercises all pages, all frame modes, zero/tiny/ordinary resizes, streaming
 capacity, text undo, queued event delivery, timers/animations, button activation and repeated

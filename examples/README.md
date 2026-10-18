@@ -1,7 +1,7 @@
 # Examples
 
-Configure the project using [Getting Started](../docs/getting_started.md). Build
-an app by its target name, then run the executable from `build/examples/`:
+From a configured TermOx checkout ([setup](../README.md#build-and-run-the-showcase)),
+build an app by its target name and run it from `build/examples/`:
 
 ```sh
 cmake --build build --target TermOx.examples.pong
@@ -21,11 +21,11 @@ The linked guides describe the relevant APIs.
 | --- | --- | --- |
 | [pong.cpp](pong.cpp) | Pong | [Timers and event processing](../docs/event-loop.md) |
 | [snake.cpp](snake.cpp) | Snake | [Timers and event processing](../docs/event-loop.md) |
-| [pinbox.cpp](pinbox.cpp) | Interactive custom drawing | [Frames and canvases](../docs/frame-and-canvas.md) |
+| [pinbox.cpp](pinbox.cpp) | Interactive custom drawing | [Custom drawing](../docs/drawing.md) |
 | [bmp_view.cpp](bmp_view.cpp) | Load a BMP file and display its pixels; pass the filename as an argument | [PixelGrid reference](../docs/reference/drawing.md#oxpixelgrid) |
-| [accumulator.cpp](accumulator.cpp) | Numeric input and a running total | [Widget API](../docs/widget-api.md) |
+| [accumulator.cpp](accumulator.cpp) | Numeric input and a running total | [Writing a custom widget](../docs/widget-api.md) |
 
-The showcase also includes a [BMP viewer](bmp-viewer.md) with a bundled fractal,
+The [Showcase](showcase.md) also includes a [BMP viewer](bmp-viewer.md) with a bundled fractal,
 file opening, zoom, panning, and image details. `bmp_reader.hpp` and `bmp_image.hpp`
 are shared image helpers, not separate executables.
 
@@ -33,5 +33,5 @@ are shared image helpers, not separate executables.
 
 | Source | Purpose | Related guide |
 | --- | --- | --- |
-| [showcase.cpp](showcase.cpp) | An interactive widget tour | [Theme and motion](../docs/theme-and-motion.md#showcase) |
+| [showcase.cpp](showcase.cpp) | Forms, data views, text, themes, and a BMP viewer | [Showcase walkthrough](showcase.md) |
 | [stress.cpp](stress.cpp) | Adjustable workloads and timing reports | [Stress Lab](stress.md) |

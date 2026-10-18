@@ -22,7 +22,7 @@ A Widget displaying one horizontal line or a vertical stack of complete Unicode
 graphemes. `.vertical` defaults to false. Alignment is along the text direction and
 the cross axis is centered. Use `set_text()` and `set_vertical()` to request layout
 and repaint, or call `refresh()` after public configuration edits. See
-[label orientation](../decorations-layouts.md#label-orientation) for sizing and clipping.
+[label orientation](../labels.md#orientation-and-alignment) for sizing and clipping.
 
 ```cpp
 auto label = Label{{
@@ -163,7 +163,7 @@ auto input = LineEdit{{
 input.on_submit.connect([](std::string const& text) { /* Use the value. */ });
 ```
 
-See [text editing](../text-editing.md#widget-integration) for the shared
+See [text editing](../text-editing.md#editing-commands) for the shared
 LineEdit/TextBox mutation commands, signals, validation, and viewport API.
 
 ## ox::TextBox
@@ -183,7 +183,7 @@ auto connections = link(text, bar);
 ```
 
 `link` returns the two signal identifiers; it tracks widget moves and lifetimes.
-See [text editing](../text-editing.md#widget-integration).
+See [text editing](../text-editing.md#editing-commands).
 
 ## Text editing
 
@@ -194,5 +194,5 @@ and atomic paste assembly. `TextLayout` owns cached display rows and width assum
 `layout_text()` is the pure calculation. Byte offsets and terminal columns remain
 explicitly separate. LineEdit and TextBox compose these with the functions in `<ox/text_view.hpp>`.
 
-See [text editing](../text-editing.md) for normalization, navigation, history, rendering,
+See [text editing internals](../internals/text.md) for normalization, navigation, history, rendering,
 and the new widget text accessors.

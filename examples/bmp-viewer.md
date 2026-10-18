@@ -1,5 +1,7 @@
 # BMP viewer in Showcase
 
+![BMP viewer showing the bundled Julia fractal, image details, and zoom controls](../docs/img/bmp-viewer.svg)
+
 Build and open the image page:
 
 ```sh

@@ -170,5 +170,5 @@ Left/Right moves across the bar and switches top-level menus while open. `open(i
 and content. `on_trigger` prepends the bar menu index to the item's path. Closing resets
 submenus so reopening begins at the top level.
 
-The [showcase](theme-and-motion.md#showcase) includes lists, dropdowns, editable
+The [showcase](../examples/showcase.md) includes lists, dropdowns, editable
 choices, radio groups, tabs, menus, and dialogs.

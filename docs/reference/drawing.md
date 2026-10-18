@@ -288,7 +288,7 @@ auto panel = canvas.subcanvas({2, 1}, {10, 3});
 put(panel, {0, 0}, "Hello 界");
 ```
 
-See [the frame and canvas guide](../frame-and-canvas.md) for coordinate checks, resize,
+See [the frame and canvas guide](../internals/frame-and-canvas.md) for coordinate checks, resize,
 Unicode width policies, complete-footprint clipping, and borrowing rules.
 
 ## ox::Renderer
@@ -302,5 +302,5 @@ position and effective style are retained across calls. The caller writes the by
 and manages visibility and flushing. Call `invalidate()` if the bytes were discarded,
 output failed, or another writer changed terminal state.
 
-See [the renderer guide](../renderer.md) for buffer lifetime, Unicode boundaries,
+See [the renderer guide](../internals/renderer.md) for buffer lifetime, Unicode boundaries,
 capability adaptation, resize behavior, and failure recovery.

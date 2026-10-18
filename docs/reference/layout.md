@@ -33,7 +33,7 @@ Column{
 ```
 
 A Row uses each child's policy for width; a Column uses it for height. Suspended
-takes a requested Area directly. See [layout calculation](../layout.md) for proportional
+takes a requested Area directly. See [layout calculation](../internals/layout.md) for proportional
 shrinking, weighted growth, largest-remainder rounding, and input validation.
 
 Pipe (`|`) operator overloading provided for Widgets to set their SizePolicy.
@@ -86,7 +86,7 @@ concept WidgetDerived = std::is_base_of_v<Widget, T>;
 
 Call `refresh()` after changing children, visibility, or policies. Const get_child
 and ordinary tuple/array/vector/list composition are supported. See
-[decorations and layouts](../decorations-layouts.md#row-and-column-refresh).
+[decorations and layouts](../internals/layout.md#refresh-and-callback-mutations).
 
 [`#include <ox/layout.hpp>`](../../include/ox/layout.hpp)
 
@@ -151,7 +151,7 @@ layouts.
 ## ox::Column
 
 Call `refresh()` after changing children, visibility, or policies. See
-[decorations and layouts](../decorations-layouts.md#row-and-column-refresh) for caching
+[decorations and layouts](../internals/layout.md#refresh-and-callback-mutations) for caching
 and mutation/callback behavior.
 
 [`#include <ox/layout.hpp>`](../../include/ox/layout.hpp)
@@ -281,7 +281,7 @@ container, and a clipped scrolling child. See [container composition](../contain
 return consecutive rectangles. `centered_rect(available, requested)` returns a clamped,
 centered rectangle. These functions have no widget or terminal dependencies.
 
-See [layout calculation](../layout.md) for allocation rules and edge cases.
+See [layout calculation](../internals/layout.md) for allocation rules and edge cases.
 
 ## ox::Border
 
@@ -395,7 +395,7 @@ struct Lines {
 
 A line widget with explicit `vertical` direction (false by default) and an overlaid
 plain label. Vertical labels stack graphemes along the line. See
-[decorations and layouts](../decorations-layouts.md) for geometry and clipping.
+[decorations and layouts](../decorations.md) for geometry and clipping.
 
 ```cpp
 Column{

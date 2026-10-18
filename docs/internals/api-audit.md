@@ -1,15 +1,15 @@
 # API audit record
 
 This record describes the checks run during the drawing, layout, and connection
-audit. Counts refer to that revision; use [Contributing](contributing.md) for
+audit. Counts refer to that revision; use [Contributing](../contributing.md) for
 current build and test commands.
 
 ## Contracts
 
 - [Drawing contracts](frame-and-canvas.md#drawing): borrowed canvases,
   validation, glyph ranges, and margin fills.
-- [Suspended](containers.md#suspended): child ownership, refresh, and geometry.
-- [Connections and lifetime](connections.md): subscription ownership and tracked
+- [Suspended](../containers.md#suspended): child ownership, refresh, and geometry.
+- [Connections and lifetime](../connections.md): subscription ownership and tracked
   widget arguments.
 
 ## Recorded validation

@@ -135,34 +135,9 @@ continues to route normally. Pane state and focus survive resizing.
 
 ## Forms
 
-Form owns a tuple or sized forward range of widgets, plus a same-length vector of
-`FormField{label,help,validate}`. Fields remain directly accessible in `children`.
-Labels occupy a shared column; `label_width` optionally fixes it. Help/errors appear
-beneath each field; `gap` separates rows. Field width policies limit controls within
-the shared field column and also constrain measurement of wrapped content. Put large
-forms inside ScrollView.
-
-```cpp
-auto form = ox::Form{std::tuple{ox::LineEdit{}},
-    std::vector<ox::FormField>{{"Name", "", [](ox::Widget const& widget)
-        -> std::optional<std::string> {
-        auto const& input = static_cast<ox::LineEdit const&>(widget);
-        return input.text().empty() ? std::optional<std::string>{"Required"} : std::nullopt;
-    }}}};
-```
-
-Validators are functions taking the actual field widget and returning an error message
-or nullopt. `submit()` validates every field, stores `errors()`, focuses the first invalid
-field, and emits `on_invalid(errors const&)` or `on_submit()`. Ctrl-Enter submits from
-within the form. Before validation, Form calls `commit()` on fields whose concrete types expose a
-boolean commit operation, including every BasicNumericEdit specialization. Invalid drafts
-produce an `"Invalid value"` field error and prevent submission. Validation then sees the
-committed typed value. Each `FormField` also accepts an optional `commit(Widget&) -> bool`
-callback, overriding automatic commit; use it for custom composites, fields stored through
-base-class references, or an explicit no-op when preserving drafts is desired. Submission
-is not atomic across fields: successful commits remain if another field is invalid.
-`set_fields` validates labels/count and resets errors. Validate functions must not alter
-field configuration while running.
+Use [Validate and submit a form](forms.md) for field composition, numeric draft
+commits, error messages, and submission signals. Form fields remain directly
+accessible through the owned or borrowed child container.
 
 ## FilePicker
 
@@ -230,5 +205,5 @@ from `on_execute` if desired. No implicit global shortcut or application state i
 
 ## Demo
 
-The [showcase](theme-and-motion.md#showcase) includes values, tree/log panes,
+The [showcase](../examples/showcase.md) includes values, tree/log panes,
 form validation, filesystem browsing, and command search.

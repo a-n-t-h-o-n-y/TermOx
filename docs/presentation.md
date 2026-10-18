@@ -1,4 +1,4 @@
-# Quiet details for widgets
+# Widget presentation
 
 Headers, cells, selections, editor text, gutters and current lines have independent
 visual roles. These use owned state, direct options and Canvas painting.
@@ -48,12 +48,9 @@ auto editor = ox::TextBox{{.text = "Notes\n",
 // Compose outer spacing and borders using Padding/Border, and scrollbars using link.
 ```
 
-Presentation fields are ordinary mutable values: call `refresh()` after changing
-them. Numbering caches line starts by text revision; it scans the document only when
-text changes and numbering is enabled, then locates visible numbers with binary
-search. Numbering is off by default, so streaming logs keep their original path.
-Digit-width changes necessarily reflow wrapped text. Both selection and caret offsets
-remain UTF-8 byte boundaries, independent of the gutter.
+Call `refresh()` after changing presentation fields. Gutter width changes reflow
+wrapped text; caret and selection offsets remain UTF-8 byte boundaries. The
+[line-number cache](internals/text.md#line-number-caching) is described under internals.
 
 ## DataTable
 
@@ -94,13 +91,9 @@ control. It returns a patch, not formatted text or terminal escapes. For example
 return a muted foreground for numeric metadata or semantic positive/negative colors
 for status values. Sorting and selection continue to operate on the original strings.
 
-`sort_order()` returns optional `{column, ascending}` after `sort_rows`. The selected
-row remains selected through sorting. Replacing data, inserting a row or modifying
-the sorted column clears the indicator; erasing rows or changing another column
-preserves it. Comparators that throw preserve the previous model/order. Header clicks
-still emit `on_header`; the application chooses whether/how to sort. Unicode markers
-become `^`/`v` in the ASCII theme. See [data tables](data-tables.md#selection-and-sorting)
-for sorting behavior and custom comparators.
+Sort markers use `^`/`v` in the ASCII theme. Header clicks emit `on_header`; the
+application chooses whether and how to sort. See [table selection and sorting](data-tables.md#selection-and-sorting)
+for selection preservation, sort state, and custom comparators.
 
 ```cpp
 auto table = ox::DataTable{{.columns = {{"Project"}, {"Status"}},
@@ -176,10 +169,8 @@ Disabled styling applies last. Glyphs with explicit colors retain them unless an
 explicit indicator/state/focus patch overrides them. Label alignment and indicator
 width measurement still use display cells, including for wide Unicode glyphs.
 
-The shared `put` glyph-range overload accepts an optional fifth `Style defaults`
-argument for this composition. Only unspecified glyph colors inherit it, glyph
-traits combine with default traits, and the explicit `StylePatch` applies last.
-Omitting it preserves the existing drawing behavior.
+Glyph default styles and explicit patches compose as described in
+[Custom drawing](drawing.md#styles-and-glyphs).
 
 ## Values, activity and tabs
 

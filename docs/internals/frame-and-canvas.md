@@ -133,7 +133,7 @@ fill glyph are rejected before drawing, even if there is no margin to paint. Com
 wide content glyphs and inherited clips remain protected by Canvas.
 
 Widgets paint through these operations. Text painting measures columns
-and avoids splitting graphemes. Their editing uses the [text editing core](text-editing.md), with grapheme-boundary
+and avoids splitting graphemes. Their editing uses the [text editing core](text.md), with grapheme-boundary
 carets, selection, and layout measured in terminal columns.
 
 ## Terminal integration

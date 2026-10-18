@@ -52,7 +52,7 @@ through const spans; mutation functions validate shape and UTF-8 before committi
 
 See [data tables and scrolling](../data-tables.md) for the complete API, examples,
 callbacks, sorting/filtering, and viewport rules. The Data page in the
-[showcase](../theme-and-motion.md#showcase) includes a table with linked scrolling.
+[showcase](../../examples/showcase.md) includes a table with linked scrolling.
 
 ## ox::ScrollBar
 
@@ -63,7 +63,7 @@ set_position notifies only on change; set_range synchronizes without feedback.
 Shared pure functions in
 `<ox/scroll.hpp>` compute limits, movement, reveal ranges, and thumb/click geometry.
 
-See [data tables and scrolling](../data-tables.md#shared-scrolling-functions).
+See [data tables and scrolling](../scrolling.md#scrolling-geometry).
 
 ## Selection and application widgets
 
@@ -88,7 +88,7 @@ editing and form commit behavior.
 All standard scrollable views implement `Scrollable` and use the same
 `link(view, scrollbar)` function. RadioGroup takes `Point{0, row}` offsets;
 TreeView and LogView expose scrolling directly. See
-[shared scrolling](../containers.md#shared-scrolling-interface).
+[shared scrolling](../scrolling.md#custom-scrollable-widgets).
 
 See [shared commands](../commands.md) for commands reused by menus, palettes, shortcuts, and KeyHelp.
 

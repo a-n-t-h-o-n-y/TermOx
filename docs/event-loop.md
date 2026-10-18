@@ -1,129 +1,92 @@
-# Application and event loop
+# Run an application and schedule timers
 
-`Application` can dispatch events, run timers, manage focus, and paint a frame without
-opening a terminal. `run()` opens an Escape session and drives input and rendering on
-the calling thread.
+`Application` borrows a root widget, manages focus and input, and opens a terminal
+when `run()` is called. Keep the root alive for the application's lifetime. Each
+widget belongs to one application.
 
 ```cpp
 #include <ox/ox.hpp>
-using namespace ox;
 
 int main()
 {
-    auto editor = LineEdit{};
-    auto app = Application{editor};
-    return app.run({.mouse_mode = MouseMode::Move});
+    auto editor = ox::LineEdit{};
+    auto app = ox::Application{editor};
+    return app.run({.mouse_mode = ox::MouseMode::Move});
 }
 ```
 
-The root widget must outlive the application. Each widget belongs to one application.
-The application selects the first visible, enabled widget that accepts tab focus. Focus is local
-to the application; use `app.set_focus(widget)`, `app.focus().get()`, or `app.clear_focus()`.
-
-## On this page
-
-- [Dispatch and repaint](#dispatch-and-repaint)
-- [Timers](#timers)
-- [Lower-level composition](#lower-level-composition)
+Use mouse move reporting for hover effects. The application initially focuses the
+first visible, enabled Tab/Strong widget. Use `app.set_focus(widget)` or
+`app.clear_focus()` for explicit changes; `app.focus().get()` returns a tracked view.
 
 ## Dispatch and repaint
 
-A handler returns an explicit result:
+`app.dispatch(event)` delivers an event immediately and applies its effects.
+`app.post(event)` queues it for a later step. Handling an event does not itself
+request painting: custom handlers return `EventResponse` with independent
+`handled`, `repaint`, and optional `quit` fields. See
+[custom widget input](widget-api.md#input-and-effects) for an implementation.
 
-```cpp
-struct EventResponse {
-    bool handled = false;
-    bool repaint = false;
-    std::optional<int> quit = std::nullopt;
-};
-```
-
-Return `{.handled = true}` when an event was processed without changing the display.
-Return `{.handled = true, .repaint = true}` to request a frame, or
-`{.handled = true, .quit = 0}` to exit. Quit takes precedence over painting.
-
-`EventLoop::step(handler, now)` processes a snapshot of posted events, then due timers.
-Posts made during callbacks wait for the next step. Input order is preserved. Multiple
-repaint requests are combined into one pending frame. `paint(handler)` calls
-`paint(Canvas)` once if a frame is pending, and returns whether to present it.
-A resize requests a repaint even if the handler has no resize method.
-
-Widget input, hover, focus, and timer callbacks return `EventResponse`.
-Raw handlers and standalone focus operations return effects; the event loop applies
-them. `app.dispatch(event)` delivers immediately and applies effects. Handling an
-event does not imply repainting. See [routing and focus](routing-and-focus.md) for
-clipped mouse paths, keyboard bubbling, Tab navigation, and focus lifetime.
-
-```cpp
-auto editor = LineEdit{};
-auto app = Application{editor};
-app.post(esc::Resize{{20, 1}});
-app.post(KeyEvent{.text = U"hello"});
-app.step();
-app.paint();
-// app.loop().screen contains the painted frame. No terminal has been opened.
-```
-
-Use `app.request_repaint()` after an external state change and `app.quit(code)` to
-request exit on the application thread. `post(Event)` is thread safe; background work
-should post an `event::Custom` callback to make changes on the application thread.
-Callbacks, focus, widget state, timer operations, and painting stay on that thread.
-
-The terminal driver waits for terminal input, posted events, or the earliest timer,
-parser, or resize-check deadline. Posting to an empty queue signals a nonblocking pipe
-on POSIX or a manual-reset event on Windows; reset and queue transfer share the queue
-lock so posts cannot lose their wakeup. There is no fixed polling interval. Escape's
-default resize checks still wake an idle terminal about every 100 milliseconds.
-The driver drains at most 64 input events per batch, then dispatches and paints,
-allowing timers to run between batches. Terminal I/O stays on the calling thread.
-
-For a custom driver, call `loop.wait(terminal.wait_state())`, then read terminal input
-with a zero timeout. `wait()` never consumes input. `loop.wait()` without a terminal
-waits for a post or scheduled timer, indefinitely when neither has a deadline. Only
-`post()` is thread safe; request repaint, quit, and change timers on the dispatch thread.
+Widget setters schedule their documented effects. After changing external drawing
+state, use `app.request_repaint()` on the application thread. Use `app.quit(code)`
+to exit. Keep widget mutations, focus, timer commands, and painting on that thread;
+[background work](background-work.md) uses `post` to return an owned result safely.
 
 ## Timers
 
-A timer is a movable handle containing a callback and a steady-clock deadline. There
-is no thread per timer. Retain the handle for as long as the timer should exist.
+Retain a `Timer` handle for as long as it should run. A widget timer receives the
+current widget by reference and follows its moves:
 
 ```cpp
-auto loop = EventLoop{};
-auto timer = Timer{std::chrono::milliseconds{30}, [&] {
-    // Update animation state here.
-    return EventResponse{.handled = true, .repaint = true};
-}};
-loop.watch(timer);
+#include <ox/ox.hpp>
+#include <chrono>
+
+int main()
+{
+    auto elapsed = ox::IntegerLabel{{.value = 0}};
+    auto app = ox::Application{elapsed};
+    auto timer = ox::Timer{
+        elapsed, std::chrono::seconds{1},
+        [](ox::IntegerLabel& label) {
+            label.set_value(label.value + 1);
+            return ox::EventResponse{};
+        },
+        true,
+    };
+    return app.run();
+}
 ```
 
-`Timer(widget, interval, callback, launch)` registers a passive widget timer.
-The callback receives the current widget by reference, so it follows widget moves. The application
-adopts it when it attaches the widget tree. Timers created after attachment are
-registered immediately. The widget's lifetime handle preserves the target when the
-widget moves; a destroyed target is ignored. Detaching a widget stops and releases its
-timers, allowing it to join another application.
+The final `true` starts this timer; widget timers are stopped by default. `start()`
+starts or restarts it, `stop()` cancels its deadline, and destroying the handle
+cancels its schedule. Intervals must be positive. Callbacks run on the application
+thread, so they must not block on I/O or long calculations.
 
-Intervals must be positive. `start(now)` starts or restarts at `now + interval`.
-`stop()` cancels the deadline. `loop.unwatch(timer)` stops and releases a timer.
-Destroying the handle cancels its schedule. One timer
-belongs to one event loop at a time. A late step delivers one tick and advances to the
-next deadline on the original cadence, rather than executing a burst of missed ticks.
-An injected `steady_clock::time_point` makes scheduling tests deterministic.
+The application adopts widget timers, including those created after attachment.
+Hidden or disabled targets are skipped. Detachment stops and releases their timers;
+destruction expires their tracked targets. For scheduling without a widget, create
+`Timer(interval, callback)` and register it with `EventLoop::watch()`.
 
-## Lower-level composition
+Timers share the event loop rather than creating threads. A late step delivers one
+tick and keeps the original cadence instead of replaying missed ticks. For purely
+visual transitions, use [Animation](theme-and-motion.md#motion).
 
-`EventLoop`, `Terminal`, and a handler can be used without `Application` or `Widget`:
+## Headless dispatch
+
+Construction, `step()`, and `paint()` need no terminal. Tests can post a resize and
+input, step the application, and inspect the resulting frame:
 
 ```cpp
-auto loop = EventLoop{};
-auto terminal = Terminal{};
-// handler provides handle(KeyEvent const&), paint(Canvas), etc. as needed.
-return process_events(loop, terminal, handler);
+auto editor = ox::LineEdit{};
+auto app = ox::Application{editor};
+app.post(esc::Resize{{20, 1}});
+app.post(ox::KeyEvent{.text = U"hello"});
+app.step();
+app.paint();
+// Inspect app.loop().screen.
 ```
 
-The loop owns posted events, scheduling, frame storage, repaint state, and the exit
-request. The terminal owns its Escape session and previous rendered frame. Application
-adds widget routing and focus. No process-wide event queue, focus, timer registry, or
-quit flag is used.
-
-Frame storage and clipped drawing are described in [frames and canvases](frame-and-canvas.md).
+For dispatch batches, wakeups, waiting, and driving `EventLoop`/`Terminal` without
+widgets, see [event-loop internals](internals/event-loop.md). For propagation,
+modal scopes, pointer capture, and focus recovery, see
+[routing internals](internals/routing-and-focus.md).

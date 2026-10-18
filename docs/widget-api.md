@@ -1,4 +1,4 @@
-# Widget API
+# Write a custom widget
 
 Widgets expose ordinary configuration and compose with the same geometry, drawing,
 text, and event functions used by standalone handlers. Application-owned state has
@@ -114,34 +114,16 @@ Fill a container background in the first hook and draw overlays in the last.
 
 ## Editing bindings
 
-`TextEdit` owns document state, selection, grapheme boundaries, and undo history.
-`edit_key(edit, event, layout, validator)` supplies the default keyboard policy as a
-free function. Custom bindings can call editing operations directly without subclassing
-or modifying the document model. `TextLayout` owns the display layout independently. `<ox/text_view.hpp>` composes these
-components with plain `Point` scroll state: `edit_text` handles a key or paste and
-refreshes layout/scroll, `text_scroll` reveals a caret, `text_offset` and `text_position`
-share the aligned geometry, and `paint_text` draws cached rows and selection. LineEdit
-and TextBox share an internal implementation that composes these functions. See [text view composition](text-editing.md#text-view-composition).
+Use the ordinary `TextEdit`, `TextLayout`, and `<ox/text_view.hpp>` functions for a
+custom editor. They return input effects and share aligned caret, hit-test, and
+painting geometry. [Text editing internals](internals/text.md#text-view-composition)
+shows their composition; [Text editing](text-editing.md) covers built-in widgets.
 
 ## Timers and lifetime
 
-Widget timers receive the actual widget instance at execution time:
-
-```cpp
-auto timer = ox::Timer{counter, std::chrono::milliseconds{30}, [](Counter& widget) {
-    ++widget.value;
-    return ox::EventResponse{.repaint = true};
-}};
-timer.start();
-```
-
-Retain the handle. Multiple timers can have independent callbacks. The application
-adopts widget timers, including timers created after attachment. They follow moves,
-respect ancestor input eligibility, and stop on detachment or destruction. Generic
-`Timer(interval, callback)` composes directly with an event loop via `loop.watch(timer)`.
-Callbacks and widget mutations run on the dispatch thread. Empty callbacks and
-nonpositive intervals are rejected. A moved-from handle can be stopped or queried with
-`is_running()`; `start()` and `duration()` reject it.
+Use [Application and timers](event-loop.md#timers) for retained widget timers and
+scheduling. Timer callbacks receive the current widget instance, so they can use the
+same state-changing methods as input handlers.
 
 `track(widget)` returns a move-aware weak view. `view.try_get()` returns a pointer or
 null without throwing; `view.get()` throws when unavailable. Typed views also reject
@@ -161,7 +143,7 @@ tuple and dynamic-container composites without imposing a new ownership model.
 | --- | --- |
 | Signal callbacks and tracked widget arguments | [Connections and lifetime](connections.md) |
 | Layout containers and shared scrolling | [Container composition](containers.md) |
-| Borders, dividers, and labels | [Decorations and layouts](decorations-layouts.md) |
+| Borders, dividers, and labels | [Decorations](decorations.md) and [Labels](labels.md) |
 | Buttons, checkboxes, and radio groups | [Controls](controls.md) |
 | Tables and scrollbars | [Data tables](data-tables.md) |
 | Editors and text views | [Text editing](text-editing.md) |

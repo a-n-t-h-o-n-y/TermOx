@@ -23,8 +23,8 @@ rectangle intersection rules as `Canvas`.
 
 An invisible widget (`visible = false`) hides its entire subtree. A disabled widget
 (`enabled = false`) remains visible but excludes its entire subtree from input,
-focus, and application-owned widget timer callbacks. Painting retains the existing
-child-before-parent order, with siblings painted in their container order.
+focus, and application-owned widget timer callbacks. Painting runs background and own content before children, then overlays; siblings
+follow their container order. See [custom widget painting](../widget-api.md#painting).
 
 `hit_test(tree, point)` returns the deepest hit index, or no value.
 `hit_path(tree, point)` returns root-to-target indices. Hits must lie inside every
@@ -116,7 +116,7 @@ or focus midway through an event. A quit result stops further callbacks immediat
 Focus callbacks can reenter focus selection. A newer transition wins over the outer
 pending transition. Exceptions from user callbacks propagate during normal dispatch;
 application destruction still attempts detachment if a focus-out callback throws.
-The root must outlive the application and remain at the same address. The library is
+The root is borrowed and should outlive the application; its tracked identity follows moves. The library is
 single-threaded for widget mutation; background work should post an event-loop action.
 
 Headless regression tests exercise nested clipping and translation, overlap, bubbling,
@@ -131,5 +131,5 @@ replace application storage. Failed attachment attempts remain pending and are r
 a foreign widget cannot bypass ownership checks on a subsequent unchanged traversal.
 See [performance benchmarks](performance.md) for measured routing workloads.
 
-See [selection and application structure](selection-and-application.md) for ListView,
+See [selection and application structure](../selection-and-application.md) for ListView,
 Select/ComboBox, Tabs, root overlays, menus, dialogs, modal scopes, and scoped shortcuts.
