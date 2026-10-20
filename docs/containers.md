@@ -119,3 +119,20 @@ Refreshing recomputes geometry even when parent bounds are unchanged. Invalid
 requested dimensions leave child geometry intact. Direct `fill_glyph` changes need
 a repaint request. Margins use `fill_outside`, described in
 [frame and canvas internals](internals/frame-and-canvas.md#drawing).
+
+## Split panes
+
+Use `SplitPane` for two resizable panels:
+
+```cpp
+auto panes = ox::SplitPane{ox::TreeView{}, ox::TextBox{}, .3};
+```
+
+The pane owns both widgets and starts with 30% of the space assigned to the first.
+Drag the divider, or focus it and use arrows, Home, and End. Set `vertical = true`
+to stack the panels instead of placing them side by side.
+
+`set_ratio` clamps a finite fraction to [0, 1] and emits `on_change` on a change.
+Resizing preserves the requested ratio and each child's state and focus.
+`first_minimum` and `second_minimum` constrain layout; when both cannot fit,
+available space is shared proportionally. The divider occupies one cell.

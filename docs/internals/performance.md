@@ -767,7 +767,7 @@ rollback. BMP fixtures cover all supported depths, row orientation/padding, pale
 bounds, bitfield normalization, invalid headers/masks, and every truncated prefix.
 ASan+UBSan passes 116 non-exception cases with every TermOx source instrumented.
 Intentional exception tests run in Release because the installed sanitizer runtime
-cannot unwind C++ exceptions. See [PixelGrid](../reference/drawing.md#oxpixelgrid) for the API.
+cannot unwind C++ exceptions. See [Pixel images](../drawing.md#pixel-images) for usage.
 
 ## Streaming logs, trees, and command searches
 

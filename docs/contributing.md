@@ -1,18 +1,24 @@
 # Contributing
 
-Build the project using [Getting Started](getting_started.md). Keep changes to
-public interfaces, their documentation, and the examples that use them together.
+Keep changes to public interfaces, their documentation, and the examples that use
+them together.
 
-## Run the tests
+## Build and test
 
-From the repository root:
+You need Git, CMake 3.18 or newer, and a C++20 compiler and standard library with
+`std::format` and coroutine support. From the repository root:
 
 ```sh
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --target TermOx.tests.unit
 ctest --test-dir build --output-on-failure
 ```
 
-The unit target also builds the separate text-allocation test executable.
+The first configure downloads pinned dependencies. The unit target also builds
+the separate text-allocation test executable. For a multi-configuration generator,
+add `--config Release` to builds and `-C Release` to CTest.
+See [build troubleshooting](getting_started.md#common-build-and-run-problems) if
+your toolchain cannot configure or compile the project.
 
 On macOS or Linux, check interactive input and terminal restoration with:
 
@@ -26,7 +32,8 @@ python3 tests/smoke_examples.py build
 
 ## Documentation changes
 
-Compile the README code block when changing it. Build any app whose walkthrough
+Compile changed C++ examples, including the counter in both the README and Getting
+Started. Keep those two copies in sync. Build any app whose walkthrough
 changes, and check its keyboard and mouse instructions in a terminal.
 Use relative links so the documentation works in a checkout and on GitHub.
 
@@ -49,10 +56,16 @@ automatically from the configured publishing branch.
 
 ## Documentation layout
 
-Public member contracts live in Doxygen comments in `include/ox/`. The generated
-reference is the method-level source; `reference.md` and `reference/` keep topic
-summaries and guide links. The root README contains the small inline program and
-build entry points. Getting Started must remain a complete first-project path.
+Public member contracts live in Doxygen comments in `include/ox/` and appear in the
+generated [API reference](https://a-n-t-h-o-n-y.github.io/TermOx/). Keep signatures,
+defaults, and member contracts there; guides explain how to use related interfaces.
+The root README contains the small inline program and build entry points.
+Getting Started must remain a complete first-project path.
+
+Start guides with a small example and common operations. Explain ownership,
+thread restrictions, validation, and callback lifetimes where they affect use.
+Link to existing explanations instead of repeating them, and reserve tables of
+contents for long pages.
 
 Practical guides live directly under `docs/`; implementation mechanisms and measured
 performance live under `docs/internals/`. App walkthroughs live beside their sources

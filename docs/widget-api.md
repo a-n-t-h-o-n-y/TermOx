@@ -1,60 +1,11 @@
 # Write a custom widget
 
-Widgets expose ordinary configuration and compose with the same geometry, drawing,
-text, and event functions used by standalone handlers. Application-owned state has
-read-only access, and handlers return effects explicitly.
-
-## On this page
-
-- [State and geometry](#state-and-geometry)
-- [Measurement and refresh](#measurement-and-refresh)
-- [Input and effects](#input-and-effects)
-- [Pointer capture](#pointer-capture)
-- [Painting](#painting)
-- [Editing bindings](#editing-bindings)
-- [Timers and lifetime](#timers-and-lifetime)
-- [Related guides](#related-guides)
-
-## State and geometry
-
-`visible`, `enabled`, `focus_policy`, `width_policy`, and `height_policy` are public configuration.
-Invisible widgets hide their subtree. Disabled widgets remain visible but their
-subtree receives no input, focus, or widget timer callbacks.
-
-`bounds()`, `at()`, and `size()` return parent-local geometry by value.
-`is_focused()` reads the focus state; application focus transitions are its only writer.
+Derive from `Widget`, handle input, and paint local content. This counter increments
+on Space presses and repeats, then requests a repaint:
 
 ```cpp
-arrange(widget, {{2, 1}, {20, 3}});
-arrange(parent, parent.bounds()); // Recalculate layout after changing child policies.
-```
+#include <ox/ox.hpp>
 
-`arrange` validates dimensions, updates bounds, requests painting if attached, and calls
-`on_arrange(previous_bounds)`. It calls the hook even when bounds are unchanged, so
-layout can react to changed content or policy. Validation failure leaves geometry
-intact. If the hook throws, the new geometry remains; layout callbacks are not a
-transaction across a whole subtree. Parents arrange their children through the same
-function. Root positioning starts at the terminal origin.
-
-`WidgetDerived` requires public inheritance and accepts const-qualified targets for borrowing. Widget's header
-includes the drawing, events, geometry, and timer declarations it uses directly, rather
-than relying on the core umbrella header to expose unrelated terminal machinery.
-
-<a id="measurement-containers-and-capture"></a>
-
-## Measurement and refresh
-
-`measure(Area available, esc::WidthPolicy)` returns natural content size without changing
-geometry. Width and height policies independently constrain allocation; `refresh()`
-requests layout and repaint after public configuration changes. Text/content commands
-request these effects automatically. `glyph_width_policy()` reads the attached frame's
-Unicode width policy. `is_enabled()` includes ancestor input eligibility when attached.
-
-## Input and effects
-
-Override `handle(Input const&)` for the input types a widget uses:
-
-```cpp
 struct Counter : ox::Widget {
     using Widget::handle; // Keep default overloads available for direct calls.
     int value = 0;
@@ -74,7 +25,15 @@ struct Counter : ox::Widget {
         return {};
     }
 };
+
+int main()
+{
+    auto counter = Counter{};
+    return ox::Application{counter}.run();
+}
 ```
+
+## Input and effects
 
 Presses, repeats, and releases reach the same key overload with their original action.
 The application consumes Tab and Shift-Tab presses/repeats for focus navigation;
@@ -85,16 +44,35 @@ and `focus_out`, each returning `EventResponse`.
 `EventResponse` is a plain aggregate: `handled` stops bubbling, `repaint` requests a
 frame, and `quit` requests an exit code. `combine(a, b)` combines these values; the
 first quit wins. Raw `handle` calls and core `dispatch` return effects without applying
-them. The event-loop boundary applies returned effects. Resize dispatch also resets
-frame storage before calling the resize handler.
+them. The event-loop boundary applies returned effects. For direct dispatch,
+focus commands, and worker posting, see [Application and timers](event-loop.md).
 
-`app.dispatch(event)` delivers immediately and applies effects. `app.post(event)`
-queues delivery for a later step and is thread safe. `app.set_focus(widget)` and
-`app.clear_focus()` are explicit commands that apply transition effects;
-`app.focus()` exposes a read-only manager. Standalone `Focus(root)` returns transition
-effects without an event loop. Keep one focus manager per tree. Destruction releases
-the focus flag without calling lifecycle hooks; call `clear()` explicitly to notify. `app.request_repaint()` and `app.quit(code)` are direct
-commands on the application thread.
+## State and geometry
+
+`visible`, `enabled`, `focus_policy`, `width_policy`, and `height_policy` are public configuration.
+Invisible widgets hide their subtree. Disabled widgets remain visible but their
+subtree receives no input, focus, or widget timer callbacks.
+
+`bounds()`, `at()`, and `size()` return parent-local geometry by value.
+`is_focused()` reads the focus state; application focus transitions are its only writer.
+
+`arrange` validates dimensions, updates bounds, requests painting if attached, and calls
+`on_arrange(previous_bounds)`. It calls the hook even when bounds are unchanged, so
+layout can react to changed content or policy. Parents arrange their children
+through the same function. Validation failure leaves geometry intact; a throwing
+hook leaves the new geometry in place. See
+[layout internals](internals/layout.md#refresh-and-callback-mutations) for reentrant
+arrangement and failure behavior.
+
+<a id="measurement-containers-and-capture"></a>
+
+## Measurement and refresh
+
+`measure(Area available, esc::WidthPolicy)` returns natural content size without changing
+geometry. Width and height policies independently constrain allocation; `refresh()`
+requests layout and repaint after public configuration changes. Text/content commands
+request these effects automatically. `glyph_width_policy()` reads the attached frame's
+Unicode width policy. `is_enabled()` includes ancestor input eligibility when attached.
 
 ## Pointer capture
 
@@ -106,9 +84,9 @@ capture when its owner becomes hidden, disabled, detached, or unavailable. Overr
 ## Painting
 
 `paint(Canvas)` returns an optional cursor in local coordinates. Return an empty cursor
-when the widget has none. There is no persistent widget cursor field. The application
-uses only the focused widget's paint result, clips it, and translates it into terminal
-coordinates. Canvas already supplies local size, clipping, and width policy.
+when the widget has none. The application uses only the focused widget's cursor,
+clips it, and translates it into terminal coordinates. Canvas already supplies
+local size, clipping, and width policy.
 The order is `paint_background`, `paint`, children, then `paint_overlay`.
 Fill a container background in the first hook and draw overlays in the last.
 
@@ -127,26 +105,12 @@ same state-changing methods as input handlers.
 
 `track(widget)` returns a move-aware weak view. `view.try_get()` returns a pointer or
 null without throwing; `view.get()` throws when unavailable. Typed views also reject
-a target whose derived type was lost through slicing. Lifetime storage is private;
-callers cannot replace it or forge a view from a shared pointer. `tracked` and
-`Connection{.signal = signal, .slot = callback}(widgets...)` compose lifetime checks with signal callbacks.
-The signal owns the slot; dropping its identifier keeps it connected. Tracked targets
-are borrowed, and callback captures remain owned until explicit removal or signal
-destruction. Empty callbacks are rejected.
+a target whose derived type was lost through slicing. Use `tracked` or `Connection`
+to apply these checks to callbacks; [Connections and lifetime](connections.md)
+explains borrowing and callback ownership.
 
 Child enumeration remains a borrowed range through `get_children()`, supporting both
 tuple and dynamic-container composites without imposing a new ownership model.
 
-## Related guides
-
-| Topic | Guide |
-| --- | --- |
-| Signal callbacks and tracked widget arguments | [Connections and lifetime](connections.md) |
-| Layout containers and shared scrolling | [Container composition](containers.md) |
-| Borders, dividers, and labels | [Decorations](decorations.md) and [Labels](labels.md) |
-| Buttons, checkboxes, and radio groups | [Controls](controls.md) |
-| Tables and scrollbars | [Data tables](data-tables.md) |
-| Editors and text views | [Text editing](text-editing.md) |
-| Lists, choices, tabs, overlays, and menus | [Selection widgets](selection-and-application.md) |
-| Values, trees, logs, forms, and files | [Composite widgets](value-and-composite-widgets.md) |
-| Pixel images | [PixelGrid reference](reference/drawing.md#oxpixelgrid) |
+See [Custom drawing](drawing.md) for shapes, styles, and pixels, or the
+[guides index](README.md) for built-in widgets.

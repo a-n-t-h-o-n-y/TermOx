@@ -8,6 +8,7 @@ and can be exercised with `post()`, `step()`, and `paint()` without opening a te
 - [Tree and geometry](#tree-and-geometry)
 - [Responses and propagation](#responses-and-propagation)
 - [Focus ownership and lifetime](#focus-ownership-and-lifetime)
+- [Overlays and modal scopes](#overlays-and-modal-scopes)
 - [Callback mutations](#callback-mutations)
 
 ## Tree and geometry
@@ -103,6 +104,24 @@ widget's old views; destruction invalidates all views. Lifetime storage is priva
 Typed lookup also rejects targets whose derived type was lost through slicing. Widget
 removal and destruction stop its registered timers. Widget timer callbacks propagate
 the widget's actual response instead of requesting unconditional repaint.
+
+## Overlays and modal scopes
+
+An ordinary child with `overlay = true` is promoted to the root layer. Its bounds are
+global, it bypasses intermediate clipping, and it paints after the entire normal tree.
+Logical ownership remains intact for event bubbling and modal eligibility; nonmodal
+choices inside a dialog therefore remain part of that dialog's input scope.
+The application arranges overlay surfaces to the root extent; their children describe
+actual panels. Owner visibility still applies. `bring_to_front` raises an attached
+overlay; opening a Popup does this automatically. Ordering belongs to the application.
+
+A visible `modal` widget confines input, Tab traversal, pointer capture, and widget timers
+to its subtree. Nested scopes save move-aware focus identities and restore the preceding
+eligible control when closed. If that control has expired, normal focus recovery applies.
+Capture outside a newly opened modal is cancelled. Global widget `shortcuts` callbacks
+are also limited by scope; they return normal EventResponse effects. Empty functions
+participate in no shortcut dispatch. Explicit `request_focus(target)` lets an attached
+container focus a newly selected descendant before its attachment is reconciled.
 
 ## Callback mutations
 

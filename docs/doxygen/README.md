@@ -59,9 +59,8 @@ for every self-explanatory argument. Small code blocks belong beside the interfa
 they demonstrate. Compile changed snippets before publishing.
 
 Guides and app walkthroughs remain Markdown in the repository. The generated site
-is the method-level reference; the handwritten topic summaries remain available for
-broader context. Escape's re-exported types are summarized in the glyph and events
-header comments, with links to their upstream declarations.
+is the API reference. Escape's re-exported types are summarized in the glyph and
+events header comments, with links to their upstream declarations.
 
 ## Appearance and versions
 

@@ -1,7 +1,8 @@
 # Connections and lifetime
 
 Signals own their callbacks. A tracked widget argument borrows a widget identity
-and supplies its current location when the signal is emitted.
+and supplies its current location when the signal is emitted. The callback receives
+signal arguments first, followed by references to the tracked widgets.
 
 ```cpp
 #include <ox/widget.hpp>
@@ -15,12 +16,6 @@ auto id = ox::Connection{
 changed(1);
 changed.disconnect(id);
 ```
-
-## On this page
-
-- [Connection ownership](#connection-ownership)
-- [Tracked widgets](#tracked-widgets)
-- [Signal emission](#signal-emission)
 
 ## Connection ownership
 
@@ -49,6 +44,4 @@ disconnected pending slots are skipped, and destroying the signal safely cancels
 callbacks. Mutable callbacks retain their state between emissions; copies own independent
 callback state. TermOx fetches the fixed upstream SignalsLight revision through CMake.
 
-See [Widget API](widget-api.md#timers-and-lifetime) for weak views and timers,
-and the [Connection reference](reference/application.md#oxconnection) for signal
-argument order and explicit disconnection.
+See [Widget API](widget-api.md#timers-and-lifetime) for weak views and timers.

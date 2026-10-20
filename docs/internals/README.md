@@ -8,6 +8,7 @@ recipes, start with the [guides](../README.md); use the generated
 | --- | --- |
 | [Layout](layout.md) | Allocation, rounding, retained plans, refresh, and callback mutations |
 | [Routing and focus](routing-and-focus.md) | Tree snapshots, coordinates, bubbling, modal scopes, capture, and focus recovery |
+| [Activation and selection](controls.md) | Shared input helpers, row selection, and row drawing |
 | [Event loop](event-loop.md) | Dispatch batches, wakeups, terminal waiting, and custom drivers |
 | [Text editing and layout](text.md) | Grapheme boundaries, history, wrapping, viewport functions, and caches |
 | [Frames and canvases](frame-and-canvas.md) | Owned cells, wide-grapheme footprints, borrowed views, and clipping |

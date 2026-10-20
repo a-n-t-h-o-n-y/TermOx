@@ -1,38 +1,21 @@
-# Control composition
+# Buttons and choices
 
-`<ox/controls.hpp>` supplies activation and index-selection functions without widgets,
-item ownership, signals, or event-loop state. Button, CheckBox, and RadioGroup use the
-same functions; custom controls can compose them with ordinary C++ state.
+Use a Button for an action, a CheckBox for a boolean, and a RadioGroup for one
+choice from a list. This button updates a status label:
 
 ```cpp
-#include <ox/controls.hpp>
+#include <ox/ox.hpp>
 
-auto selected = std::optional<std::size_t>{};
-auto response = ox::move_selection(selected, 5, 1); // Highlight the first item.
-response = ox::select_index(selected, 3, 5);        // Select index three.
-auto key = ox::KeyEvent{.key = U' '};
-if (ox::activates(key)) { /* Activate the highlighted item. */ }
+int main()
+{
+    auto button = ox::Button{{.label = {.text = "Run"}}};
+    auto status = ox::Label{"Ready"};
+    auto root = ox::Column{std::tie(button, status)};
+    ox::Connection{.signal = button.on_activate,
+                   .slot = [](ox::Label& label) { label.set_text("Running"); }}(status);
+    return ox::Application{root}.run();
+}
 ```
-
-## On this page
-
-- [Activation and selection helpers](#activation-and-selection-helpers)
-- [Button](#button)
-- [CheckBox](#checkbox)
-- [RadioGroup](#radiogroup)
-- [Layout and repaint](#layout-and-repaint)
-
-## Activation and selection helpers
-
-`activates` accepts an unmodified Enter/Space press or a left mouse press.
-Key repeats and releases do not activate. `releases` recognizes activation-key
-releases and left/unspecified mouse releases; widgets match these to their own gestures.
-
-`select_index(selected, index, count)` rejects out-of-range values, returning no effects.
-A valid value is handled and requests repaint only if it differs. `move_selection`
-clamps navigation, initializes an empty optional to zero, and safely normalizes stale
-indices after item removal. Empty lists clear the optional and remain unhandled.
-Both return EventResponse and never schedule painting or emit callbacks.
 
 ## Button
 
@@ -40,27 +23,40 @@ Button emits `on_activate()` once for an Enter/Space press, or for a captured mo
 press released inside the button. Repeats do not activate, and dragging outside cancels
 activation unless the pointer returns before release. `activate()` follows the same
 semantic action. `on_press`/`on_release` describe mouse gestures only. Interaction state
-is read through `is_pressed()` and `is_hovered()`; label, style patches, decoration, and
-fade configuration remain ordinary public values. Fade follows hover OR focus.
+is read through `is_pressed()` and `is_hovered()`.
 
 ## CheckBox
 
-CheckBox owns its checked state. Read `checked()` and use `set_checked(bool)` or
-`toggle()`; `on_change(bool)` emits once per actual change. Its plain `Label::Options label` adds a clickable caption beside the indicator. Enter/Space repeats do not toggle.
+```cpp
+auto notifications = ox::CheckBox{{.checked = true,
+                                    .label = {.text = "Notifications"}}};
+notifications.set_checked(false);
+```
+
+Read `checked()` and use `set_checked(bool)` or `toggle()` to change it.
+`on_change(bool)` emits once per actual change. Clicking the caption also toggles
+the control; Enter/Space repeats do not toggle it.
 
 ## RadioGroup
 
-RadioGroup owns its items and optional selected/highlighted indices. `items()` returns
-a const span; `set_items(...)` replaces the items and clears selection. `select(index)`
-selects, `select(std::nullopt)` clears, and invalid indices throw. `selected_index()` and
-`highlighted_index()` expose state. Arrows move and select; Enter/Space or a left click
-selects the highlighted row. `on_select(std::optional<std::size_t>)` emits only when
-selection changes, preserving identity even when labels repeat. Slots may replace items;
-notification values are snapshots.
+```cpp
+auto quality = ox::RadioGroup{{.items = {"Draft", "Normal", "High"},
+                                .selected_index = 1}};
+quality.select(2);
+```
+
+Read `selected_index()`; `select(index)` changes it and `select(std::nullopt)` clears
+it. Invalid indices throw. Replacing items with `set_items` clears selection.
+`on_select` emits only on a change and supplies an index snapshot, so duplicate
+labels remain distinct and callbacks can safely replace items.
+
+Arrows move and select; Enter/Space or a left click selects the highlighted row.
+Home/End/PageUp/PageDown and the wheel navigate longer lists. Disabled rows are
+skipped. RadioGroup supports [vertical scrolling](scrolling.md).
 
 ## Layout and repaint
 
-Controls use `appearance(style)` for disabled styling. Commands request repaint, and
-changes affecting measurement request layout. For public configuration edits, call
-`refresh()` to recalculate layout and repaint. Named
-`Connection{.signal = signal, .slot = callback}(widgets...)` remains supported.
+Commands request repaint and any needed layout. After editing public configuration,
+call `refresh()`. See [presentation](presentation.md#buttons-and-choice-indicators)
+for indicator and focus styles, and [Connections](connections.md) for callback
+ownership. Custom controls can reuse the [activation and selection helpers](internals/controls.md).

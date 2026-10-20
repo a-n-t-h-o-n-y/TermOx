@@ -215,8 +215,9 @@ editor.set_caret(ox::text_offset(layout, {4, 0}, size, align, scroll));
 an edit; the key overload prepares layout before geometry-dependent bindings. They
 use the layout's owned width policy and tab width, return effects, and do not apply
 them to an application. An optional scalar predicate uses an empty `std::function`
-to mean no filtering. `LineEdit::validator` uses this same type; clear it
-with `validator = {}`.
+to mean no filtering. `LineEdit::accept_character` uses this scalar predicate;
+clear it with `accept_character = {}`. The separate `validator` checks the complete
+text on submission. See [filtering and submission](../text-editing.md#filtering-and-submission).
 
 `text_scroll` keeps the caret visible and snaps scrolling to complete grapheme
 boundaries. Short right-aligned text shifts left one cell when necessary to display

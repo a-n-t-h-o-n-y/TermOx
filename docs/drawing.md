@@ -48,5 +48,30 @@ only unspecified glyph colors inherit defaults, glyph traits combine with defaul
 traits, and an explicit patch applies last. See the generated
 [reference](https://a-n-t-h-o-n-y.github.io/TermOx/) for overloads and validation.
 
-For outlines and titles, use [Borders and dividers](decorations.md). For RGB images,
-use `PixelGrid` as shown by the [BMP viewer](../examples/bmp-viewer.md).
+For outlines and titles, use [Borders and dividers](decorations.md).
+
+## Pixel images
+
+`PixelGrid` owns an RGB image. Each terminal cell displays two vertically adjacent
+pixels using a half-block character, so a 20 × 20 image occupies 20 columns and
+10 rows at its native size.
+
+```cpp
+#include <ox/ox.hpp>
+
+int main()
+{
+    auto image = ox::PixelGrid{ox::Area{20, 20}, ox::RGB{0x182d24}};
+    image.set_pixel({5, 5}, ox::RGB{0xffcc88});
+    return ox::Application{image}.run();
+}
+```
+
+Use `set_pixel` to update a pixel and request repaint, or `set_image` to replace
+the image with row-major RGB data. Direct edits through `pixels()` or `at()` need
+an application repaint request. Custom widgets can draw their own RGB storage with
+`paint_pixels(canvas, size, pixels)`.
+
+The [BMP viewer](../examples/bmp-viewer.md) demonstrates loading, zooming, and
+panning. See the [API reference](https://a-n-t-h-o-n-y.github.io/TermOx/) for
+PixelGrid and pixel drawing contracts.

@@ -37,6 +37,8 @@ The layout owns the widgets. The connection passes the live label to the callbac
 
 ## Build and run the showcase
 
+These instructions use `library-refactor`, the development branch for TermOx III.
+
 You need Git, CMake 3.18 or newer, and a C++20 compiler and standard library with
 `std::format` and coroutine support. CMake fetches the dependencies on the first configure.
 
@@ -56,4 +58,5 @@ cmake --build build --target TermOx.examples.showcase
 - [Apps](examples/README.md): source files, build targets, and walkthroughs.
 - [Internals](docs/internals/README.md): layout calculation, routing, frames, and rendering.
 
-Contributions are welcome. TermOx is released under the [MIT license](LICENSE).
+See [Contributing](docs/contributing.md) for build and test instructions.
+TermOx is released under the [MIT license](LICENSE).

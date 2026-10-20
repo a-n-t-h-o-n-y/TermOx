@@ -1,7 +1,6 @@
 # Getting started
 
-Create a small project, add TermOx as a source dependency, and run the program from
-the root README. The finished project has its own executable and CMake target.
+Build a small counter application with TermOx as a source dependency.
 
 ## Requirements
 
@@ -28,9 +27,29 @@ cd my_app
 git clone --branch library-refactor https://github.com/a-n-t-h-o-n-y/TermOx.git external/TermOx
 ```
 
-The commands use the repository's current development branch. Create `main.cpp` in
-`my_app/` and paste the **complete C++ block**, including `main()`, from the
-[README counter](../README.md#a-counter). No separate counter example file is needed.
+The commands use the development branch for TermOx III. Create `main.cpp` in
+`my_app/`:
+
+```cpp
+#include <ox/ox.hpp>
+
+using namespace ox;
+
+int main()
+{
+    auto root = Column{
+        IntegerLabel{{.value = 0}},
+        Button{{.label = {.text = "Increment"}}},
+    };
+    auto& [count, button] = root.children;
+    Connection{
+        .signal = button.on_activate,
+        .slot = [](IntegerLabel& count) { count.set_value(count.value + 1); },
+    }(count);
+
+    return Application{root}.run();
+}
+```
 
 Create `CMakeLists.txt` next to `main.cpp`:
 
@@ -52,10 +71,6 @@ my_app/
   main.cpp
   external/
     TermOx/
-      CMakeLists.txt
-      include/
-      src/
-      ...
 ```
 
 The `TermOx` target supplies include paths and dependency links. This uses the source
@@ -73,7 +88,6 @@ cmake --build build --target my_app
 
 CMake fetches the pinned dependencies during the first configure. Building `my_app`
 also builds the library; it does not build the repository's example apps or tests.
-The directory tree does not require any global include paths or manual library lists.
 
 These commands assume a single-configuration generator such as Ninja or Makefiles.
 With a multi-configuration generator, build with `--config Release` and run the
@@ -115,8 +129,5 @@ cmake --build build --target TermOx.examples.showcase
 ```
 
 The [Showcase walkthrough](../examples/showcase.md) lists its pages and controls.
-For a standalone checkout, the [root README](../README.md#build-and-run-the-showcase)
-has the shorter build sequence. The [apps index](../examples/README.md) lists games
-and tools, and the [guides](README.md) cover scrolling, forms, background work, and
-custom widgets. Use the generated [API reference](https://a-n-t-h-o-n-y.github.io/TermOx/)
-for individual members.
+Continue with the [guides](README.md), browse the [example apps](../examples/README.md),
+or look up individual members in the [API reference](https://a-n-t-h-o-n-y.github.io/TermOx/).

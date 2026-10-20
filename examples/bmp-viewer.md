@@ -53,6 +53,6 @@ limits files to 32 MiB and images to 16 megapixels to bound synchronous loading 
 memory use. The decoder supports 1-, 4-, 8-, 16-, 24-, and 32-bit BMPs with
 uncompressed pixels or supported 16-/32-bit color masks; compressed BMPs are rejected.
 
-See [drawing](../docs/reference/drawing.md#oxpixelgrid) for pixel rendering APIs
-and [file selection](../docs/value-and-composite-widgets.md#filepicker) for browser
+See [Pixel images](../docs/drawing.md#pixel-images) for pixel drawing
+and [file selection](../docs/file-picker.md) for browser
 behavior.

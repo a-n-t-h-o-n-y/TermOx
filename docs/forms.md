@@ -69,5 +69,5 @@ beneath each field; `gap` separates rows. Field width policies limit controls wi
 the shared field column and also constrain measurement of wrapped content. Put large
 forms inside ScrollView.
 
-For numeric draft parsing and formatting, see [Values and status](value-and-composite-widgets.md#values-and-status).
+For numeric drafts and formatting, see [Numeric input](values.md#commit-numeric-drafts).
 For a larger form and a modal dialog around it, see the [Showcase](../examples/showcase.md).

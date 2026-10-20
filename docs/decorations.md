@@ -1,9 +1,7 @@
 # Borders and dividers
 
 Wrap a widget with `Border` for an outline and title. Put `Divider` between
-sections of a layout. Both keep their labels as plain `Label::Options` values,
-without a separate widget lifetime, focus state, or child enumeration. Border
-configuration is copyable.
+sections of a layout. Both accept a label and a style for the decoration.
 
 ```cpp
 #include <ox/ox.hpp>
@@ -19,42 +17,31 @@ int main()
 }
 ```
 
-## On this page
-
-- [Borders](#borders)
-- [Dividers](#dividers)
-- [Paint decoration text](#paint-decoration-text)
-- [Related guides](#related-guides)
-
 ## Borders
 
-`border_content_rect(Area)` gives the child's parent-local rectangle. The border uses
-one cell on each side; dimensions smaller than two leave an empty interior. Its origin
-is clamped to the available area, including zero-sized views. Bordered uses this function
-for construction and arrangement. `paint_border(Canvas, Border const&)` draws the box
-and overlays the title along the top edge between the corners, leaving the interior
-untouched. Label alignment/style are independent of the box style. Label width/height policies
-are unused in decorations. Bordered still exposes child/border and supports `widget | Border`.
+`widget | Border{...}` creates a `Bordered` wrapper that owns the widget. Access it
+through `child` and change its outline through `border`. The border reserves one
+cell on each side; tiny views can leave an empty interior.
+
+The title sits along the top edge between the corners. Its alignment and style are
+independent of the box style. Titles stay horizontal, and their label size policies
+are unused. Call `refresh()` after editing public configuration.
 
 ## Dividers
 
-Divider has explicit `vertical` configuration, defaulting to false, even in a 1×1 view.
-Put a vertical divider in a Row and a horizontal one in a Column. Its width is fixed(1) when vertical; its height is fixed(1) when horizontal. Larger views draw the line down the middle of
-the cross axis. `paint_divider` clears its view, draws that line, and overlays its label.
-Horizontal labels are ordinary text; vertical labels stack one grapheme per row, with
-each centered across the width. For vertical labels, `Align::Start/Center/End` means
-top/middle/bottom along the vertical axis. A glyph too wide for the view ends the fitting
-prefix. Lines::ascii uses `|` vertically and `-` horizontally.
+Put a horizontal Divider in a Column, or set `vertical = true` for one in a Row.
+The default size is one cell across the line; larger views center it on that axis.
+Labels follow the divider's direction. For vertical labels, `Align::Start`,
+`Center`, and `End` mean top, middle, and bottom. See [Labels](labels.md) for Unicode
+fitting. `Lines::ascii()` uses `|` vertically and `-` horizontally.
 
 ## Paint decoration text
 
-`put_label(Canvas, text, align, style, vertical=false)` draws text without clearing
-the surrounding line. `paint_label` takes the same optional orientation and clears
-the view to styled spaces first. Both validate the complete UTF-8 input and obey
-the canvas width policy and clip. Orientation, natural measurement, accepted text,
-and fitting-prefix rules have their primary explanation in [Labels](labels.md).
-Border titles stay horizontal; Divider labels follow the divider's orientation.
-Embedded label orientation and size policies are not used by these owners.
+Custom widgets can use `paint_border` and `paint_divider` to draw decorations
+directly. `put_label` draws text without clearing the surrounding area;
+`paint_label` clears its view first. These helpers obey the canvas clip and the
+[label fitting rules](labels.md#measurement-and-fitting). See the
+[API reference](https://a-n-t-h-o-n-y.github.io/TermOx/) for their arguments.
 
 ## Related guides
 

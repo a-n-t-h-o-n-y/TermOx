@@ -22,7 +22,7 @@ The linked guides describe the relevant APIs.
 | [pong.cpp](pong.cpp) | Pong | [Timers and event processing](../docs/event-loop.md) |
 | [snake.cpp](snake.cpp) | Snake | [Timers and event processing](../docs/event-loop.md) |
 | [pinbox.cpp](pinbox.cpp) | Interactive custom drawing | [Custom drawing](../docs/drawing.md) |
-| [bmp_view.cpp](bmp_view.cpp) | Load a BMP file and display its pixels; pass the filename as an argument | [PixelGrid reference](../docs/reference/drawing.md#oxpixelgrid) |
+| [bmp_view.cpp](bmp_view.cpp) | Load a BMP file and display its pixels; pass the filename as an argument | [Pixel images](../docs/drawing.md#pixel-images) |
 | [accumulator.cpp](accumulator.cpp) | Numeric input and a running total | [Writing a custom widget](../docs/widget-api.md) |
 
 The [Showcase](showcase.md) also includes a [BMP viewer](bmp-viewer.md) with a bundled fractal,
