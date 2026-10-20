@@ -24,11 +24,10 @@ From a directory where you keep source projects:
 ```sh
 mkdir -p my_app/external
 cd my_app
-git clone --branch library-refactor https://github.com/a-n-t-h-o-n-y/TermOx.git external/TermOx
+git clone https://github.com/a-n-t-h-o-n-y/TermOx.git external/TermOx
 ```
 
-The commands use the development branch for TermOx III. Create `main.cpp` in
-`my_app/`:
+Create `main.cpp` in `my_app/`:
 
 ```cpp
 #include <ox/ox.hpp>

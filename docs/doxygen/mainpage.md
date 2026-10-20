@@ -18,9 +18,9 @@ options, and signals; header links show the declarations in context.
 
 ## Guides and apps
 
-- [Getting started](https://github.com/a-n-t-h-o-n-y/TermOx/blob/library-refactor/docs/getting_started.md)
-- [Topic guides](https://github.com/a-n-t-h-o-n-y/TermOx/blob/library-refactor/docs/README.md)
-- [Apps and development tools](https://github.com/a-n-t-h-o-n-y/TermOx/blob/library-refactor/examples/README.md)
+- [Getting started](https://github.com/a-n-t-h-o-n-y/TermOx/blob/HEAD/docs/getting_started.md)
+- [Topic guides](https://github.com/a-n-t-h-o-n-y/TermOx/blob/HEAD/docs/README.md)
+- [Apps and development tools](https://github.com/a-n-t-h-o-n-y/TermOx/blob/HEAD/examples/README.md)
 - [Source repository](https://github.com/a-n-t-h-o-n-y/TermOx)
 
 This reference is generated from inline comments in the public headers. Methods,

@@ -28,19 +28,14 @@ downloads, or JavaScript package manager. The regular library build can also add
 
 ## Publishing
 
-[The reference workflow](../../.github/workflows/reference.yml) builds on pushes
-to `library-refactor` and on pull requests. Pull requests upload an HTML artifact
-for inspection; pushes to `library-refactor` also publish through GitHub's official
-Pages artifact and deployment actions. A manual run is available once the workflow
-exists on the default branch.
+[The reference workflow](../../.github/workflows/reference.yml) builds pull requests
+and pushes to the repository's default branch. Pull requests upload an HTML artifact
+for inspection; default-branch pushes also publish through GitHub's Pages actions.
+Manual runs build the selected revision and publish only from the default branch.
 
 The reference is hosted at <https://a-n-t-h-o-n-y.github.io/TermOx/>. Pages uses
 **GitHub Actions** as its source. No generated-file branch or publishing token is
 needed. Only the deployment job has Pages write permissions.
-
-While the refactor is underway, `library-refactor` is the publishing branch. When
-it is merged, change the workflow's push branch and both deployment conditions to
-`main`, and update the branch links in `mainpage.md`.
 
 ## Inline documentation
 

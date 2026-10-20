@@ -2,7 +2,6 @@ name: API reference
 
 on:
   push:
-    branches: [library-refactor]
   pull_request:
   workflow_dispatch:
 
@@ -15,6 +14,7 @@ concurrency:
 
 jobs:
   build:
+    if: github.event_name != 'push' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
@@ -38,13 +38,13 @@ jobs:
           name: api-reference
           path: build/docs/html
       - name: Prepare Pages artifact
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/library-refactor'
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         uses: actions/upload-pages-artifact@v5
         with:
           path: build/docs/html
 
   deploy:
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/library-refactor'
+    if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     needs: build
     runs-on: ubuntu-24.04
     permissions:

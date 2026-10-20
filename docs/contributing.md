@@ -52,7 +52,7 @@ package is needed. Check the result at README display size after regenerating it
 
 Build the generated reference using [the Doxygen instructions](doxygen/README.md).
 The reference workflow checks comments on pull requests and publishes the HTML
-automatically from the configured publishing branch.
+automatically from the repository's default branch.
 
 ## Documentation layout
 
@@ -84,8 +84,8 @@ pages. In particular:
 | Worker lifetime and posting UI updates | [Background work](background-work.md) |
 
 Add guides to the [documentation index](README.md), update incoming links when moving
-a page, and check anchors as well as file paths. Keep the branch in the README,
-Getting Started clone command, and Doxygen publishing instructions consistent.
+a page, and check anchors as well as file paths. Use default checkout commands
+and links that remain valid after a merge.
 
 ## Background material
 
