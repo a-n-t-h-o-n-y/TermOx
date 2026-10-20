@@ -5,7 +5,8 @@ connect actions to state changes, and `Application` handles input and painting.
 
 ## Widgets and ownership
 
-Layouts store widgets by value, or borrow them through references:
+Layouts store widgets by value, or borrow them through references. Inside `main()`,
+with `<ox/ox.hpp>` included:
 
 ```cpp
 auto name = ox::LineEdit{};
@@ -46,20 +47,8 @@ widget is destroyed. Pass widgets this way rather than capturing their addresses
 or references to their current locations.
 
 The signal owns the callback and its captures. The returned identifier allows
-explicit disconnection; discarding it does **not** disconnect. For example:
-
-```cpp
-#include <ox/widget.hpp>
-
-sl::Signal<void(int)> changed;
-ox::Widget target;
-auto id = ox::Connection{
-    .signal = changed,
-    .slot = [](int value, ox::Widget& widget) { widget.enabled = value != 0; },
-}(target);
-changed(1);
-changed.disconnect(id);
-```
+explicit disconnection with `signal.disconnect(id)`; discarding it does **not**
+disconnect.
 
 Capturing other application objects still requires those objects to outlive the
 callback. All signal emission and widget mutation belong on the application thread.
@@ -86,14 +75,15 @@ painting or quit. Handling an event alone does not request a repaint.
 Use `app.quit(code)` to exit from a callback. Enable mouse move reporting with
 `app.run({.mouse_mode = ox::MouseMode::Move})` when using hover effects.
 
-The application initially focuses the first visible, enabled Tab/Strong widget.
-Tab and Shift-Tab move focus. Use `app.set_focus(widget)` or `app.clear_focus()` for
-explicit changes. Invisible widgets hide their subtrees; disabled widgets stay
+The application initially focuses the first visible, enabled widget whose
+`focus_policy` allows Tab navigation. Tab and Shift-Tab move focus. Use
+`app.set_focus(widget)` or `app.clear_focus()` for explicit changes.
+Invisible widgets hide their subtrees; disabled widgets stay
 visible but their subtrees receive no input, focus, or widget timer callbacks.
 
 `app.dispatch(event)` delivers an event immediately and applies its effects.
 `app.post(event)` queues it for a later step. Only `post` is thread-safe; keep focus,
-widget changes, timers, and painting on the application thread. See
+widget changes, timers, and painting on the thread that runs the application. See
 [background work](recipes.md#background-work) for posting worker results safely.
 
 ## Timers

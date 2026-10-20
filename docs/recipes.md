@@ -138,6 +138,8 @@ int main()
 For a modal chooser, put the picker inside a [Dialog](#dialogs) and connect these
 signals to close it. Neither closes the surrounding dialog automatically.
 
+Set `.mode` to a `FilePickerMode` value:
+
 | Mode | Accepted selection |
 | --- | --- |
 | `OpenFile` | An existing regular file |
@@ -264,7 +266,6 @@ and pass them to `set_rows`. Replacement clears selection and vertical scroll.
 If selection must survive filtering, retain a record ID in application state and
 find its new view index after replacement. Table indices are not permanent IDs.
 
-For single-cell edits use `set_cell`; incremental insert/erase operations preserve
-unaffected rows. Add [scrollbars](layout.md#link-a-scrollbar) for large views.
+Add [scrollbars](layout.md#link-a-scrollbar) for large views.
 See [DataTable](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1_data_table.html) for updates and sorting, and the [Showcase](../examples/showcase.md)
 for filtering, header sorting, and linked scrolling together.

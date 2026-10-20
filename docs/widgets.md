@@ -96,13 +96,13 @@ emits `on_invalid`. Copy signal text if application state needs to retain it.
 
 Ctrl+C/X/V use the application's clipboard, which defaults to in-memory storage.
 Replace `app.clipboard.read` and `.write` for a host clipboard; callbacks run on the
-application thread. Read-only editors allow copying. For line numbers and selection
-colors, see [editor appearance](appearance.md#editors).
+application thread. For line numbers and selection colors, see
+[editor appearance](appearance.md#editors).
 
 ## Numeric input
 
 Use `Slider` for a range, `NumericEdit` for decimal input, and `IntegerEdit` for whole
-numbers. This example connects a slider to a numeric field:
+numbers:
 
 ```cpp
 #include <ox/ox.hpp>
@@ -122,7 +122,8 @@ int main()
 
 Ranges have inclusive bounds and a positive step. Programmatic values clamp to the
 range without snapping to a step. Use `value()` and `set_value`; `on_change` reports
-changes. See [Slider](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1_slider.html) and [BasicNumericEdit](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1_basic_numeric_edit.html) for range and editing options.
+changes. `NumericEdit` and `IntegerEdit` are specializations of `BasicNumericEdit`.
+See [Slider](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1_slider.html) and [BasicNumericEdit](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1_basic_numeric_edit.html) for range and editing options.
 
 ### Drafts and formatting
 
@@ -187,7 +188,6 @@ Configure columns and supply rectangular rows of UTF-8 strings. See
 [sorting and filtering](recipes.md#sorting-and-filtering-a-table) for a complete example.
 Use `set_rows` for replacement or `set_cell`/`insert_row`/`erase_row` for incremental
 updates. Replacement clears selection; incremental edits preserve unaffected rows.
-View indices are not permanent record IDs.
 
 [TreeView](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1_tree_view.html) displays nested choices:
 

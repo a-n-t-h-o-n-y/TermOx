@@ -1,7 +1,7 @@
 # Layout
 
 Use `Row` and `Column` to arrange widgets, then add padding, borders, or scrolling.
-The examples below use `<ox/ox.hpp>`.
+Short snippets below go inside `main()` with `<ox/ox.hpp>` included.
 
 - [Rows, columns, and sizing](#rows-and-columns)
 - [Changing a layout](#changing-a-layout)
@@ -18,9 +18,6 @@ The examples below use `<ox/ox.hpp>`.
 auto controls = ox::Row{ox::Label{"Name"}, ox::LineEdit{}};
 controls.gap = 1;
 controls.cross_align = ox::CrossAlign::Center;
-auto padded = ox::Padding{std::move(controls), std::array{1, 2, 1, 2}};
-auto pages = ox::Stack{std::move(padded), ox::TextBox{{.text = "Details"}}};
-pages.select(1);
 ```
 
 Rows place children horizontally; columns place them vertically. `gap` separates
@@ -45,13 +42,12 @@ sizes cannot fit, children and gaps shrink to the available area. See
 ## Changing a layout
 
 After editing children, visibility, spacing, alignment, or size policies, call
-`refresh()` on the affected layout. For the borrowed row in
-[Core concepts](core-concepts.md#widgets-and-ownership):
+`refresh()` on the affected layout. Using `controls` from above:
 
 ```cpp
-save.visible = false;
-row.gap = 2;
-row.refresh();
+controls.gap = 2;
+controls.cross_align = ox::CrossAlign::End;
+controls.refresh();
 ```
 
 This arranges children at the current bounds and requests repaint. Refresh a nested
@@ -59,8 +55,13 @@ layout when its children change, even if its own bounds remain the same.
 
 ## Padding, borders, and dividers
 
-`Padding` owns one child. Its insets are top, right, bottom, left, as in the first
-example. `widget | Border{...}` adds an outline and optional title:
+`Padding` owns one child. Its insets are top, right, bottom, left:
+
+```cpp
+auto padded = ox::Padding{std::move(controls), std::array{1, 2, 1, 2}};
+```
+
+`widget | Border{...}` adds an outline and optional title:
 
 ```cpp
 #include <ox/ox.hpp>
@@ -86,11 +87,18 @@ See [Border](https://a-n-t-h-o-n-y.github.io/TermOx/structox_1_1_border.html) an
 
 ## Pages and split panes
 
-`Stack` shows one page at a time. Use `select(index)` to switch or
-`select(std::nullopt)` to hide all pages. Only the selected page participates in
+`Stack` shows one page at a time:
+
+```cpp
+auto pages = ox::Stack{std::move(padded), ox::TextBox{{.text = "Details"}}};
+pages.select(1);
+```
+
+Use `select(index)` to switch or `select(std::nullopt)` to hide all pages.
+Only the selected page participates in
 focus, timers, input, and painting. Refresh after editing a dynamic page container.
 
-`Tabs` adds a labeled strip:
+For pages with a labeled strip, use `Tabs` instead:
 
 ```cpp
 auto pages = ox::Tabs{
@@ -183,3 +191,5 @@ The requested extent is clamped to the available area. The child's size policy i
 not consulted; the wrapper's policy controls the space allocated by its parent.
 Call `refresh()` after changing `requested_size`. See [Suspended](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1_suspended.html) for fill and
 geometry details.
+
+Next, use [Widgets](widgets.md) to choose controls or [Recipes](recipes.md) to combine them.

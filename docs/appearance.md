@@ -11,6 +11,8 @@ Set a theme on the application, then override individual widget styles as needed
 
 ## Themes
 
+With your root widget constructed:
+
 ```cpp
 auto app = ox::Application{root};
 auto theme = ox::Theme::dark();
@@ -92,8 +94,7 @@ auto table = ox::DataTable{{.columns = {{"Project"}, {"Status"}},
 ```
 
 Column widths include padding; row heights and separators count toward scroll
-extents. Header clicks emit `on_header`; connect it to sorting explicitly, as in
-[the table recipe](recipes.md#sorting-and-filtering-a-table).
+extents.
 
 Table cell styling applies in this order: base/focus → column → stripe →
 `cell_style` → hover → selection → inactive selection. The `cell_style` callback

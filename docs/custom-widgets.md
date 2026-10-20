@@ -97,7 +97,6 @@ not byte offsets. See [Canvas](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_
 a styled glyph, a character, or an appearance change. Character fills preserve
 existing styles; style/color fills preserve text. `clear` uses default-styled spaces.
 
-A `Style` replaces a complete appearance. A `StylePatch` changes selected components.
 Glyph defaults fill unspecified colors and combine traits; an explicit patch applies
 last. Use [theme roles](appearance.md#colors-and-overrides) for custom widgets that
 follow the application theme.

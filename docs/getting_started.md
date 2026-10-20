@@ -103,9 +103,10 @@ should increase. Ctrl-C exits and restores the terminal. Run this from a termina
 shell rather than an IDE's output panel.
 
 The Column owns the label and button. The connection supplies the live label to its
-callback, and `set_value()` requests the update. Read
-[Core concepts](core-concepts.md) for widget and callback ownership and
-[Layout](layout.md) for arranging and sizing widgets.
+callback, and `set_value()` requests the update.
+
+Continue with [Core concepts](core-concepts.md) to understand ownership, connections,
+and updates.
 
 ## Common build and run problems
 
@@ -128,6 +129,3 @@ cmake --build build --target TermOx.examples.showcase
 ```
 
 The [Showcase walkthrough](../examples/showcase.md) lists its pages and controls.
-Continue with [Core concepts](core-concepts.md), then [Layout](layout.md).
-Use the [guides index](README.md) for other topics and the
-[API reference](https://a-n-t-h-o-n-y.github.io/TermOx/) for individual members.
