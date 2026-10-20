@@ -56,44 +56,27 @@ automatically from the repository's default branch.
 
 ## Documentation layout
 
-Public member contracts live in Doxygen comments in `include/ox/` and appear in the
-generated [API reference](https://a-n-t-h-o-n-y.github.io/TermOx/). Keep signatures,
-defaults, and member contracts there; guides explain how to use related interfaces.
-The root README contains the small inline program and build entry points.
-Getting Started must include everything needed to build and run a first app.
+Keep the user guides in seven pages: Getting started, Core concepts, Layout,
+Widgets, Appearance, Recipes, and Custom widgets. The [index](README.md) gives
+new readers a starting order. Add sections to these guides before creating another
+page. Keep the root README brief.
 
-Start guides with a small example and common operations. Explain ownership,
-thread restrictions, validation, and callback lifetimes where they affect use.
-Link to existing explanations instead of repeating them, and reserve tables of
-contents for long pages.
+Guides explain tasks and concepts with useful examples. Preserve ownership, thread,
+validation, and callback details where they affect correct use. Keep exhaustive
+member descriptions, defaults, and edge cases beside public declarations in
+`include/ox/`, published in the [API reference](https://a-n-t-h-o-n-y.github.io/TermOx/).
+Check that a contract is documented there before removing its only explanation.
 
-Practical guides live directly under `docs/`; implementation mechanisms and measured
-performance live under `docs/internals/`. App walkthroughs live beside their sources
-in `examples/`. Each rule should have one primary explanation, linked from other
-pages. In particular:
+Explain each topic in one place and link to it elsewhere. When moving a section,
+update incoming links and check anchors as well as file paths. Use default checkout
+commands and links that remain valid after a merge. App walkthroughs stay beside
+their sources in `examples/`.
 
-| Topic | Primary page |
-| --- | --- |
-| Layout composition and refresh use | [Layout and containers](containers.md) |
-| Allocation and callback mechanics | [Layout internals](internals/layout.md) |
-| Borders and dividers | [Decorations](decorations.md) |
-| Label orientation and fitting | [Labels](labels.md) |
-| Focus/selection patches and control density | [Widget presentation](presentation.md) |
-| Scroll links and thumb behavior | [Scrolling](scrolling.md) |
-| Form commit and validation order | [Forms](forms.md) |
-| Worker lifetime and posting UI updates | [Background work](background-work.md) |
+## Implementation and performance
 
-Add guides to the [documentation index](README.md), update incoming links when moving
-a page, and check anchors as well as file paths. Use default checkout commands
-and links that remain valid after a merge.
-
-## Background material
-
-- [Performance](internals/performance.md): benchmark commands, recorded environments, and
-  measurements from optimization work.
-- [API audit record](internals/api-audit.md): validation results recorded during the drawing,
-  layout, and connection audit.
+- [Internals](internals/README.md): layout, event routing, text storage, frames, and rendering.
+- [Performance](internals/performance.md): benchmark commands, environments, and recorded measurements.
 - [Stress Lab](../examples/stress.md): adjustable workloads and headless timing.
 
-Validation counts in historical notes describe those runs, not the current test
-suite. Use the commands above to check your checkout.
+Historical measurements describe the recorded runs. Use the current build and test
+commands above when checking a change.

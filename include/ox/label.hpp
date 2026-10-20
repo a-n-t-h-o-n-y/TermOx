@@ -1,5 +1,5 @@
 /** @file
- * Styled, aligned, wrapped UTF-8 labels.
+ * Styled, aligned horizontal and vertical UTF-8 labels.
  */
 #pragma once
 
@@ -17,18 +17,26 @@
 namespace ox {
 
 /** Draw a clipped, aligned label without filling around it. Vertical labels stack
- * graphemes; alignment is along the line and the cross axis is centered. */
+ * graphemes; alignment is along the line and the cross axis is centered.
+ * Draw only the fitting prefix, without splitting graphemes. A vertical grapheme
+ * wider than the view ends that prefix, even if later text would fit.
+ * Text must be valid UTF-8 with printable graphemes of known, positive width;
+ * tabs, line breaks, and control characters are rejected.
+ */
 void put_label(Canvas c,
                std::string_view text,
                Align align,
                Style style,
                bool vertical = false);
-/** Draw an aligned label with inherited clipping, preserving complete graphemes and
- * leaving surrounding cells untouched.
+/** Fill the clipped view with spaces in the supplied style, then draw with put_label().
  */
 void paint_label(Canvas c, std::string_view text, Align align, Style style,
                  bool vertical = false);
-/** Natural extent of printable, single-line text, using reusable Unicode analysis. */
+/** Natural extent of printable, single-line text, using reusable Unicode analysis.
+ * Horizontal extent is terminal columns by one row. Vertical extent is the widest
+ * grapheme by the grapheme count; empty vertical text measures 0 by 0.
+ * Text has the same validity requirements as put_label().
+ */
 auto measure_label(TextLayout& cache, std::string_view text, bool vertical = false,
                    esc::WidthPolicy policy = {}) -> Area;
 
@@ -90,8 +98,9 @@ class Label : public Widget {
      * changed.
      */
     auto set_text(std::string value) -> bool;
-    /** Change text direction, update default direction-dependent size policies, and
-     * request layout/repaint if changed.
+    /** Change text direction, update policies that still match the previous direction's
+     * defaults, and request layout/repaint if changed. Customized policies are preserved.
+     * Editing vertical directly followed by refresh() performs the same policy update.
      */
     auto set_vertical(bool value) -> bool;
     void refresh() override;

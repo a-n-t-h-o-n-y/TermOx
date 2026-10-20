@@ -70,15 +70,15 @@ from a child's layout callback propagate; earlier callbacks are not rolled back.
 `centered_rect(available, requested)` clamps the requested width and height to the
 available area, then centers the result. Odd spare cells remain at the right or bottom.
 `Suspended` uses an explicit requested size rather than consulting the child's size
-policy; [the container guide](../containers.md#suspended) shows its use.
+policy; [the container guide](../layout.md#centered-content) shows its use.
 
 ## Refresh and callback mutations
 
 Row and Column share one implementation over the caller's tuple or sized forward
-range. [Container composition](../containers.md#row-and-column) describes ownership
+range. [Core concepts](../core-concepts.md#widgets-and-ownership) describes ownership
 and child access.
 
-The public refresh workflow is described in [Layout and containers](../containers.md#changing-a-layout).
+The public refresh workflow is described in [Layout](../layout.md#changing-a-layout).
 `arrange(layout, bounds)` also always refreshes descendants, even when the bounds have
 not changed. Refresh the layout whose children changed; a refresh from outside arrangement
 can also start at an ancestor to propagate through nested layouts. Public field edits do

@@ -18,11 +18,10 @@ The application arranges and routes through a widget tree, paints clipped canvas
 into a frame, and passes that frame to the renderer. Text layout supplies the same
 byte-to-cell mapping for painting, caret movement, and hit testing.
 
-## Measurements and maintenance records
+## Performance and development
 
 - [Performance](performance.md): benchmark commands, recorded workloads, and optimization results.
-- [API audit](api-audit.md): historical contract checks.
 - [Contributing](../contributing.md): current build, test, and documentation checks.
 
-Historical validation counts describe those recorded runs. Use the current test
-commands when checking a change.
+Historical measurements describe the recorded runs. Use the current test commands
+when checking a change.

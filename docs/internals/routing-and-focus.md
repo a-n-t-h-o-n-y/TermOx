@@ -25,7 +25,7 @@ rectangle intersection rules as `Canvas`.
 An invisible widget (`visible = false`) hides its entire subtree. A disabled widget
 (`enabled = false`) remains visible but excludes its entire subtree from input,
 focus, and application-owned widget timer callbacks. Painting runs background and own content before children, then overlays; siblings
-follow their container order. See [custom widget painting](../widget-api.md#painting).
+follow their container order. See [custom widget painting](../custom-widgets.md#painting).
 
 `hit_test(tree, point)` returns the deepest hit index, or no value.
 `hit_path(tree, point)` returns root-to-target indices. Hits must lie inside every
@@ -150,5 +150,6 @@ replace application storage. Failed attachment attempts remain pending and are r
 a foreign widget cannot bypass ownership checks on a subsequent unchanged traversal.
 See [performance benchmarks](performance.md) for measured routing workloads.
 
-See [selection and application structure](../selection-and-application.md) for ListView,
-Select/ComboBox, Tabs, root overlays, menus, dialogs, modal scopes, and scoped shortcuts.
+See [Widgets](../widgets.md#lists-and-dropdowns) for lists and dropdowns,
+[Layout](../layout.md#pages-and-split-panes) for tabs, and
+[Recipes](../recipes.md#dialogs) for dialogs and shared commands.

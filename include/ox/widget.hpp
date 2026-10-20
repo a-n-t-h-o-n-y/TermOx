@@ -464,6 +464,12 @@ template <typename SlotFn, WidgetDerived... TrackedWidgets>
  * The signal owns its slot. Discarding the identifier keeps it connected;
  * signal.disconnect(id) removes it. Tracked targets are borrowed, not owned.
  *
+ * Callbacks must be copyable. A disconnected slot returned by signal.disconnect()
+ * can still be called and retains its captures while held. SignalsLight snapshots
+ * each emission: new slots wait until the next emission, disconnected pending slots
+ * are skipped, and destroying the signal cancels pending callbacks. Mutable callbacks
+ * retain state between emissions; copies own independent callback state.
+ *
  * The label argument below is resolved at invocation, so it follows moves and
  * suppresses the callback after the label is destroyed:
  * @code{.cpp}

@@ -53,6 +53,6 @@ limits files to 32 MiB and images to 16 megapixels to bound synchronous loading 
 memory use. The decoder supports 1-, 4-, 8-, 16-, 24-, and 32-bit BMPs with
 uncompressed pixels or supported 16-/32-bit color masks; compressed BMPs are rejected.
 
-See [Pixel images](../docs/drawing.md#pixel-images) for pixel drawing
-and [file selection](../docs/file-picker.md) for browser
+See [Pixel images](../docs/custom-widgets.md#pixel-images) for pixel drawing
+and [file selection](../docs/recipes.md#file-selection) for browser
 behavior.

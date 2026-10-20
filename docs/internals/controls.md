@@ -1,6 +1,6 @@
 # Activation and row selection
 
-[Controls](../controls.md) and [selection widgets](../selection-and-application.md)
+[Controls](../widgets.md#buttons-and-choices) and [selection widgets](../widgets.md#lists-and-dropdowns)
 cover widget use.
 
 `<ox/controls.hpp>` supplies activation and index-selection functions without widgets,
@@ -41,4 +41,4 @@ interprets arrows, page keys, Home, and End, while `row_target` finds an eligibl
 alignment, whole-grapheme clipping, ellipsis, and caller-owned TextLayout storage.
 DataTable uses the same navigation and visible-row/text painting functions.
 
-For custom event handlers, see [Writing a custom widget](../widget-api.md).
+For custom event handlers, see [Writing a custom widget](../custom-widgets.md).

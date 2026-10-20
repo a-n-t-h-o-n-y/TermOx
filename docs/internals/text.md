@@ -21,7 +21,7 @@ auto clicked = layout.offset({3, 0});
 edit.set_caret(clicked);
 ```
 
-For application editing commands and validation, start with [Text editing](../text-editing.md).
+For application editing commands and validation, start with [Text editing](../widgets.md#text-editing).
 
 ## On this page
 
@@ -217,7 +217,7 @@ use the layout's owned width policy and tab width, return effects, and do not ap
 them to an application. An optional scalar predicate uses an empty `std::function`
 to mean no filtering. `LineEdit::accept_character` uses this scalar predicate;
 clear it with `accept_character = {}`. The separate `validator` checks the complete
-text on submission. See [filtering and submission](../text-editing.md#filtering-and-submission).
+text on submission. See [filtering and submission](../widgets.md#text-editing).
 
 `text_scroll` keeps the caret visible and snaps scrolling to complete grapheme
 boundaries. Short right-aligned text shifts left one cell when necessary to display
@@ -240,7 +240,7 @@ selection drawing functions. Custom bindings can still use `edit_key` or individ
 `TextEdit` operations and call `text_scroll` explicitly.
 
 Optional editor gutters, focus/current-line styling, and composed borders/scrollbars
-are described in [editor and table presentation](../presentation.md).
+are described in [editor and table presentation](../appearance.md).
 
 ## Line-number caching
 
@@ -248,7 +248,7 @@ TextBox caches logical line starts by document revision. It scans the document o
 when text changes and line numbering is enabled, then locates visible numbers with
 binary search. Numbering is off by default, so streaming logs avoid that work.
 Digit-width changes reflow the text area; offsets stay in document byte coordinates.
-See [editor presentation](../presentation.md#textbox-and-lineedit) for gutter configuration.
+See [editor presentation](../appearance.md#editors) for gutter configuration.
 
 ## Paste routing and widget notifications
 
@@ -256,7 +256,7 @@ LineEdit and TextBox expose the same content/viewport/offset interface as other
 scrollable widgets. Manual scrolling preserves caret and selection; edits reveal
 the caret. Painting does not edit the document or emit notifications. `on_scroll`
 reports changed offset, content size, or viewport size, including geometry changes.
-See [Link scrolling](../scrolling.md) for the shared connection contract.
+See [Link scrolling](../layout.md#scrolling) for the shared connection contract.
 
 The application binds a streaming paste to the widget that handles its first chunk.
 Changing focus does not redirect the rest. Removal or disabling drops the remaining

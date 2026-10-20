@@ -603,7 +603,7 @@ analysis. The raw samples are retained, and no general repaint speedup is claime
 Controls use shared activation/selection functions and explicit state, with no duplicate
 focus state or temporary Label widgets. Styled string/span drawing avoids intermediate
 label glyph vectors and copies solely for focus styling. Control-specific speedups are
-not measured here; see [control composition](../controls.md) for the interface changes.
+not measured here; see [activation and selection helpers](controls.md) for their composition.
 
 Validation passes all 171 Release cases, including five allocation-fault cases, all six
 example builds, seven PTY smoke checks, and 9,720 cached-painter differential comparisons.
@@ -644,8 +644,9 @@ long grapheme strings, schema changes, data validation, or sorting. Tables own t
 construction and memory use grow with row count. Stable sorting orders indices first,
 reserves the new row vector, and then moves row vectors without copying cell strings.
 
-See [data tables and scrolling](../data-tables.md) for viewport functions, table ownership,
-selection/sorting, Unicode clipping, and linked scrollbar behavior.
+See [DataTable](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1_data_table.html)
+for viewport and update contracts, and [the table recipe](../recipes.md#sorting-and-filtering-a-table)
+for sorting and filtering.
 
 Validation passes all 186 Release cases, including six allocation-fault cases; seven
 examples build, including the new interactive table, and eight PTY checks pass.
@@ -707,8 +708,7 @@ five calls instead of sixteen. Large geometry changes are effectively unchanged 
 run the core allocation/rounding algorithm; custom child hooks and nested layouts can
 allocate independently. This does not promise allocation-free application resize.
 
-See [decorations and layouts](../decorations.md) for drawing, geometry, mutation,
-and callback safety.
+See [Layout](../layout.md#padding-borders-and-dividers) for composing borders and dividers.
 
 Validation passes all 200 Release cases, including seven allocation-fault cases;
 all seven examples build and eight PTY smoke checks pass. The standalone decoration
@@ -767,7 +767,7 @@ rollback. BMP fixtures cover all supported depths, row orientation/padding, pale
 bounds, bitfield normalization, invalid headers/masks, and every truncated prefix.
 ASan+UBSan passes 116 non-exception cases with every TermOx source instrumented.
 Intentional exception tests run in Release because the installed sanitizer runtime
-cannot unwind C++ exceptions. See [Pixel images](../drawing.md#pixel-images) for usage.
+cannot unwind C++ exceptions. See [Pixel images](../custom-widgets.md#pixel-images) for usage.
 
 ## Streaming logs, trees, and command searches
 
