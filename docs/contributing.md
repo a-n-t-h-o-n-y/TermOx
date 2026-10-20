@@ -60,7 +60,7 @@ Public member contracts live in Doxygen comments in `include/ox/` and appear in 
 generated [API reference](https://a-n-t-h-o-n-y.github.io/TermOx/). Keep signatures,
 defaults, and member contracts there; guides explain how to use related interfaces.
 The root README contains the small inline program and build entry points.
-Getting Started must remain a complete first-project path.
+Getting Started must include everything needed to build and run a first app.
 
 Start guides with a small example and common operations. Explain ownership,
 thread restrictions, validation, and callback lifetimes where they affect use.

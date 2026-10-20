@@ -1,8 +1,7 @@
 # Edit text
 
 Use `LineEdit` for one line and `TextBox` for multiple lines. Both own normalized
-UTF-8 text, selection, undo history, and a viewport. This program displays an editor
-and reports submitted text in a label:
+UTF-8 text, selection, undo history, and a viewport.
 
 ```cpp
 #include <ox/ox.hpp>

@@ -1,7 +1,7 @@
 # Numeric input and status
 
 Use `Slider` to choose a value visually, `NumericEdit` for decimal input, and
-`IntegerEdit` for whole numbers. This program connects a slider to a numeric field:
+`IntegerEdit` for whole numbers.
 
 ```cpp
 #include <ox/ox.hpp>

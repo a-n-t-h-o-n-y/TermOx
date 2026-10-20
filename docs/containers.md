@@ -34,7 +34,7 @@ Rows place children horizontally; columns place them vertically. `gap` separates
 visible children. `cross_align` selects `Stretch`, `Start`, `Center`, or `End` on
 the other axis. Invisible children and root overlays consume no normal layout space.
 
-Layouts retain ordinary tuples, pairs, arrays, vectors, lists, or other sized forward
+Layouts accept tuples, pairs, arrays, vectors, lists, or other sized forward
 ranges. Stored widget values are owned. A tuple of references borrows widgets instead:
 
 ```cpp

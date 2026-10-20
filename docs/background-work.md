@@ -62,7 +62,7 @@ for queue transfer and waiting behavior.
 
 ## Use FilePicker for directory browsing
 
-`FilePicker` already owns asynchronous directory listing and path validation. Its
+`FilePicker` handles asynchronous directory listing and path validation. Its
 `filter` and `loader` run on the worker, so they must not capture widgets. Results,
 `on_state`, `on_error`, and `on_choose` are delivered on the application thread.
 See [File selection](file-picker.md) for those callbacks and

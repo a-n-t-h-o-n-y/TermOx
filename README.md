@@ -1,15 +1,11 @@
 # TermOx III 🐂🐂🐂
 
-TermOx is a C++20 library for terminal user interfaces. Compose widgets with rows
-and columns, connect their signals, and run the application. It includes text
+TermOx is a C++20 library for terminal user interfaces. It includes layouts, text
 editors, tables, trees, menus, and custom drawing, with keyboard and mouse input.
 
 [![TermOx Showcase with progress controls, a graph, and theme controls](docs/img/showcase.svg)](examples/showcase.md)
 
 ## A counter
-
-Click **Increment**, or press Tab to focus the button and Enter to activate it.
-Ctrl-C exits.
 
 ```cpp
 #include <ox/ox.hpp>
@@ -32,9 +28,6 @@ int main()
 }
 ```
 
-The layout owns the widgets. The connection passes the live label to the callback;
-`set_value()` updates it and requests a repaint.
-
 ## Build and run the showcase
 
 You need Git, CMake 3.18 or newer, and a C++20 compiler and standard library with
@@ -47,6 +40,8 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --target TermOx.examples.showcase
 ./build/examples/TermOx.examples.showcase
 ```
+
+Ctrl-C exits.
 
 ## Documentation
 

@@ -1,6 +1,6 @@
 # Stress Lab
 
-Build in **Release** to see the library's performance:
+Build in **Release**:
 
 ```sh
 cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release

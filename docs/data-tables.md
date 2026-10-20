@@ -1,8 +1,7 @@
 # Display and sort a table
 
 DataTable owns rectangular rows of UTF-8 text. Cells are read-only; users can select
-or activate rows. Headers stay visible while rows scroll. This example sorts the
-Count column numerically:
+or activate rows. Headers stay visible while rows scroll.
 
 ```cpp
 #include <ox/ox.hpp>

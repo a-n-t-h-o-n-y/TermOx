@@ -1,8 +1,7 @@
 # Frame rendering
 
-`Renderer` compares completed frames and returns encoded terminal bytes. It opens no
-terminal, reads no input, and performs no I/O. It composes with `Frame` and Escape's
-encoding API; `Terminal::commit_changes()` uses this same renderer.
+`Renderer` compares completed frames and returns terminal bytes encoded with Escape.
+It performs no I/O. `Terminal::commit_changes()` uses it to present frames.
 
 ```cpp
 #include <ox/core/renderer.hpp>

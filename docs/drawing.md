@@ -1,7 +1,7 @@
 # Draw custom content
 
 Override a widget's `paint(Canvas)` to draw in its local terminal cells. A canvas
-already carries the inherited clip and glyph-width policy; the application owns the
+carries the inherited clip and glyph-width policy; the application owns the
 frame and presents it to the terminal.
 
 ```cpp
@@ -25,7 +25,7 @@ int main()
 ```
 
 Use `paint_background` for a container fill and `paint_overlay` for decorations that
-go over its children. [Writing a custom widget](widget-api.md#painting) owns the paint
+go over its children. [Writing a custom widget](widget-api.md#painting) covers the paint
 order, input effects, and cursor rules.
 
 ## Local coordinates and clipping

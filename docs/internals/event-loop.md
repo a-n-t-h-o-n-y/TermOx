@@ -2,7 +2,6 @@
 
 [Application and timers](../event-loop.md) covers normal application use;
 [Background work](../background-work.md) covers thread ownership and posting results.
-This page describes dispatch batches and custom terminal drivers.
 
 ## Dispatch batches
 

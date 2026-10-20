@@ -1,12 +1,9 @@
 # Link scrolling
 
 TextBox, LineEdit, ListView, DataTable, ScrollView, RadioGroup, TreeView, and LogView
-share a scrolling interface. A `ScrollBar` can follow either axis without reaching
-into a composite widget's children.
+share a scrolling interface. Use `link(view, bar)` to connect a `ScrollBar` to either axis.
 
 ## Link a view and a scrollbar
-
-This complete program shows a read-only text view with a vertical scrollbar:
 
 ```cpp
 #include <ox/ox.hpp>

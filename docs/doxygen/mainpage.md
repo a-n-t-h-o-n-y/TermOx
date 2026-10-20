@@ -1,11 +1,9 @@
 # TermOx API reference
 
-TermOx is a C++20 library for terminal user interfaces. Build applications from
-widgets, compose them with layouts, and connect their signals.
+TermOx is a C++20 library for terminal user interfaces.
 
-Browse **Classes**, **Namespaces**, and **Files** in the sidebar, or search for an
-interface or method by name. Each class page lists its constructors, methods,
-options, and signals; header links show the declarations in context.
+Search for a type or method, or browse **Classes**, **Namespaces**, and **Files**
+in the sidebar.
 
 | Start with | Interfaces |
 | --- | --- |
@@ -23,9 +21,6 @@ options, and signals; header links show the declarations in context.
 - [Apps and development tools](https://github.com/a-n-t-h-o-n-y/TermOx/blob/HEAD/examples/README.md)
 - [Source repository](https://github.com/a-n-t-h-o-n-y/TermOx)
 
-This reference is generated from inline comments in the public headers. Methods,
-options, signals, enum values, and inherited interfaces are documented beside their
-declarations. Class pages describe ownership, notifications, errors, and coordinate
-units where they affect use. Escape input and drawing types are summarized on the
-[events](events_8hpp.html) and [glyph](glyph_8hpp.html) header pages, with links to
+This reference is generated from comments in the public headers. Escape input and
+drawing types are summarized on the [events](events_8hpp.html) and [glyph](glyph_8hpp.html) header pages, with links to
 the upstream declarations.

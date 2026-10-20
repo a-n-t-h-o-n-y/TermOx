@@ -1,7 +1,6 @@
 # Widget presentation
 
-Headers, cells, selections, editor text, gutters and current lines have independent
-visual roles. These use owned state, direct options and Canvas painting.
+Widget options control colors, selection styles, spacing, and indicators.
 
 ## On this page
 
@@ -31,14 +30,14 @@ It does not scroll horizontally. Clicking it selects the complete logical line.
 selection, caret visibility, keyboard navigation and wrapping use that same area.
 LineEdit ignores `line_numbers`.
 
-`highlight_line` (default `false`) enables a restrained highlight on the focused display row.
+`highlight_line` (default `false`) highlights the focused display row.
 The themed default mixes the control background toward the selection color; its
-explicit patch applies afterwards. The highlighted row retains ordinary text-selection
+explicit patch applies afterwards. The highlighted row retains text-selection
 colors. The current logical line number uses the theme accent while focused.
 
-Styled themes use a quieter foreground for unfocused selections. Explicit selection
+Styled themes use the muted foreground for unfocused selections. Explicit selection
 colors retain precedence; `inactive_selection_style` can override them for the
-unfocused state. Plain themes continue to use explicit patches and inverse selection.
+unfocused state. Plain themes use explicit patches and inverse selection.
 LineEdit's accent/underline focus treatment respects an explicit focus foreground.
 
 ```cpp
@@ -54,12 +53,12 @@ wrapped text; caret and selection offsets remain UTF-8 byte boundaries. The
 
 ## DataTable
 
-Column widths continue to include their padding. `cell_padding=1` controls horizontal
+Column widths include their padding. `cell_padding=1` controls horizontal
 padding per side; narrow columns clamp their text area to zero safely. `row_height=1`
 controls body height in terminal rows, with text vertically centered. It must be
 positive; padding must be nonnegative. Headers remain one row tall. `header_separator=true`
 adds a rule below them; `show_header=false` removes both. `row_lines` (default `false`) adds rules
-between body rows, independently of the existing `column_lines` switch.
+between body rows, independently of `column_lines`.
 
 Scroll offsets and extents remain **display cells**, including row spacing/rules.
 Mouse selection and hover ignore separator rows; keyboard pages and wheel navigation
@@ -74,12 +73,12 @@ settings that overflow terminal coordinates are rejected.
 | `focused_style`, `blurred_style` | Base appearance of focused/unfocused controls |
 | `inactive_selected_style` | Additional patch for the unfocused selection |
 | `empty_style` | Empty-state appearance, based on the muted theme role |
-| `TableColumn::heading_style` | Header appearance independent of the existing body-column `style` |
+| `TableColumn::heading_style` | Header appearance independent of the body-column `style` |
 | `cell_style(row,column)` | Optional pure function returning an additional `StylePatch` |
 | `show_sort_indicator=true` | Show a small ascending/descending marker after explicit sorting |
 
-Headers use the muted theme role with the existing bold header patch. Selection uses
-the accent when focused and a quieter foreground when unfocused. Explicit colors win.
+Headers use the muted theme role with the bold header patch. Selection uses
+the accent when focused and the muted foreground when unfocused. Explicit colors win.
 Hover applies below selection, so moving the pointer never obscures the selected row.
 The cell style order is base/focus → column → stripe/alternate → callback → hover →
 selection → inactive selection. The header order is muted base/focus → header
@@ -89,7 +88,7 @@ patch → column heading patch; sort markers use the theme accent.
 state or the table's const data accessors; it must not mutate, move or destroy the
 control. It returns a patch, not formatted text or terminal escapes. For example,
 return a muted foreground for numeric metadata or semantic positive/negative colors
-for status values. Sorting and selection continue to operate on the original strings.
+for status values. Sorting and selection operate on the original strings.
 
 Sort markers use `^`/`v` in the ASCII theme. Header clicks emit `on_header`; the
 application chooses whether and how to sort. See [table selection and sorting](data-tables.md#selection-and-sorting)
@@ -108,12 +107,12 @@ auto table = ox::DataTable{{.columns = {{"Project"}, {"Status"}},
 
 Call `refresh()` after changing presentation fields. Use mouse move reporting for
 hover (`Application::run({.mouse_mode = MouseMode::Move})`). Plain themes use explicit
-stripe/hover patches; styled themes supply the subtle automatic colors. Border shape,
-outer spacing, scrollbars, captions and status/help lines remain ordinary composition.
+stripe/hover patches; styled themes supply default colors.
+Use separate widgets for borders, spacing, scrollbars, captions, and status/help lines.
 
 ## Lists and trees
 
-`ListView` uses the same restrained row treatment as DataTable. `striped` and
+`ListView` shares DataTable's row styles. `striped` and
 `hover_rows` default to `false`. `alternate_style` applies to odd rows regardless
 of `striped`; the flag enables an automatic themed background. `hover_style` applies
 only when row hover is enabled and the item is enabled. Hover follows the pointer's
@@ -142,8 +141,7 @@ auto choices = ox::ListView{{.items = {{"Inbox"}, {"Review"}, {"Done"}},
 
 Menus inherit these fields, and Select/ComboBox expose their lists as `popup.child`.
 Configure those components directly. CommandPalette and FilePicker also share the
-ListView renderer, so the quieter inactive-selection treatment carries through their
-controlled lists. Selection and activation contracts stay the same. LogView and
+ListView renderer and its inactive-selection styles. LogView and
 numeric editors use the TextBox/LineEdit options on `editor`.
 
 TreeView accepts shared row presentation in `Options::list`. Each `TreeNode::style`
@@ -157,8 +155,8 @@ navigation and activation do not depend on guide visibility.
 
 Button adds `hover_style`, `blurred_style` and `show_focus_indicator` (default `true`).
 The style order is themed feedback → focus/blur → hover → pressed → disabled.
-The marker switch hides the keyboard focus marks; focus styling and existing button
-spacing remain. Decorations and fades remain ordinary composed paint functions.
+`show_focus_indicator=false` hides the keyboard focus marks without changing focus
+styles or button spacing.
 
 Checkbox and switch labels keep the normal text color; accent/muted colors belong
 to their indicators. `indicator_style` patches either state, then `checked_style` or
@@ -188,8 +186,8 @@ optional fill animation settles. Spinner uses `running_style` and `stopped_style
 the default stopped appearance is muted. Presentation changes start no additional
 timers. All these controls apply disabled styling after role patches.
 
-Tabs exposes `unselected_style`, `indicator_style` and `track_style` alongside its
-existing `selected_style`. `show_separator=false` removes the themed indicator rule
+Tabs exposes `unselected_style`, `indicator_style` and `track_style` alongside
+`selected_style`. `show_separator=false` removes the themed indicator rule
 and gives its row back to the page. Call `refresh()` when toggling it; page geometry,
 measurement and tab mouse hits use the same strip height. Plain themes retain a
 one-row strip. Border, padding, captions and help text remain separate components.

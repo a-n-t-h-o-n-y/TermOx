@@ -1,7 +1,6 @@
 # Write a custom widget
 
-Derive from `Widget`, handle input, and paint local content. This counter increments
-on Space presses and repeats, then requests a repaint:
+Derive from `Widget`, handle input, and paint local content:
 
 ```cpp
 #include <ox/ox.hpp>
@@ -85,14 +84,14 @@ capture when its owner becomes hidden, disabled, detached, or unavailable. Overr
 
 `paint(Canvas)` returns an optional cursor in local coordinates. Return an empty cursor
 when the widget has none. The application uses only the focused widget's cursor,
-clips it, and translates it into terminal coordinates. Canvas already supplies
+clips it, and translates it into terminal coordinates. Canvas supplies
 local size, clipping, and width policy.
 The order is `paint_background`, `paint`, children, then `paint_overlay`.
 Fill a container background in the first hook and draw overlays in the last.
 
 ## Editing bindings
 
-Use the ordinary `TextEdit`, `TextLayout`, and `<ox/text_view.hpp>` functions for a
+Use `TextEdit`, `TextLayout`, and `<ox/text_view.hpp>` functions for a
 custom editor. They return input effects and share aligned caret, hit-test, and
 painting geometry. [Text editing internals](internals/text.md#text-view-composition)
 shows their composition; [Text editing](text-editing.md) covers built-in widgets.
@@ -109,8 +108,8 @@ a target whose derived type was lost through slicing. Use `tracked` or `Connecti
 to apply these checks to callbacks; [Connections and lifetime](connections.md)
 explains borrowing and callback ownership.
 
-Child enumeration remains a borrowed range through `get_children()`, supporting both
-tuple and dynamic-container composites without imposing a new ownership model.
+`get_children()` returns a borrowed range of children for both tuple and
+dynamic-container composites.
 
 See [Custom drawing](drawing.md) for shapes, styles, and pixels, or the
 [guides index](README.md) for built-in widgets.

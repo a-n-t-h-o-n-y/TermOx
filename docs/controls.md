@@ -1,7 +1,7 @@
 # Buttons and choices
 
 Use a Button for an action, a CheckBox for a boolean, and a RadioGroup for one
-choice from a list. This button updates a status label:
+choice from a list.
 
 ```cpp
 #include <ox/ox.hpp>

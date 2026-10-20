@@ -1,6 +1,6 @@
 # Theme and motion
 
-TermOx can apply one visual policy to the entire widget tree:
+Set the application theme with `set_theme`:
 
 ```cpp
 auto app = ox::Application{root};
@@ -13,10 +13,8 @@ return app.run({.mouse_mode = ox::MouseMode::Move});
 `Theme::plain()` is the default. Choose a preset to apply colors and styling
 throughout the application.
 
-The styled themes use open-ended focus marks, a moving tab underline, restrained
-selection backgrounds, generous button insets, and fractional progress fills.
-Widget values, selection, focus, and input remain immediate. Motion affects
-presentation; tab contents change immediately while the underline moves.
+Animations do not delay input or state changes. For example, tab contents change
+immediately while the underline moves.
 
 ## On this page
 
@@ -151,7 +149,7 @@ Start and length are in cell units along the first row, or the first column with
 `vertical = true`. A zero length draws only the track. Start and length are rounded
 to whole cells. Coordinates can extend outside the canvas and are clipped without shifting the rule's geometry.
 Nonfinite coordinates, negative lengths, and overflowing endpoints are rejected.
-`ascii = true` uses ordinary ASCII strokes instead. Custom dashed, dotted, double,
+`ascii = true` uses ASCII strokes instead. Custom dashed, dotted, double,
 and box presets retain their configured glyphs.
 
 Progress fills use eighth-cell block characters. An almost-empty partial

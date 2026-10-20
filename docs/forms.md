@@ -1,13 +1,11 @@
 # Validate and submit a form
 
-Use `Form` to line up labels, editors, help, and errors. Field widgets remain ordinary
-controls; the form commits their drafts before running cross-field validation.
+Use `Form` to line up labels, editors, help, and errors. It commits field drafts
+before running cross-field validation.
 
 ## Compose the fields
 
-This complete program requires a name and an integral voice count. Press Ctrl+Enter
-inside the form or activate Save. Invalid fields show an error; successful submission
-updates the status line.
+This form requires a name and an integer voice count. Submit with Ctrl+Enter or Save.
 
 ```cpp
 #include <ox/ox.hpp>

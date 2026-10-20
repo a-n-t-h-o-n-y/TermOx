@@ -1,7 +1,7 @@
 # Choose a file or directory
 
-`FilePicker` browses directories and validates a selection asynchronously. This
-program displays the chosen path; it leaves opening the file to the application:
+`FilePicker` browses directories and validates a selection asynchronously.
+Handle file I/O in the application.
 
 ```cpp
 #include <ox/ox.hpp>

@@ -3,7 +3,7 @@
 Start with [Getting Started](getting_started.md) to build your own application.
 The generated [API reference](https://a-n-t-h-o-n-y.github.io/TermOx/) lists methods,
 options, signals, and enum values. [Apps](../examples/README.md) show larger programs;
-[internals](internals/README.md) explains how the library works underneath them.
+[internals](internals/README.md) covers the implementation.
 
 ## Common tasks
 

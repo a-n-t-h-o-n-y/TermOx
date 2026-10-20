@@ -13,7 +13,6 @@ With a multi-configuration generator, build with `--config Release` and run from
 `build/examples/Release/` instead.
 
 The target for each source below is `TermOx.examples.<filename without .cpp>`.
-The linked guides describe the relevant APIs.
 
 ## Apps
 

@@ -12,14 +12,15 @@ cmake --build build --target TermOx.examples.showcase
 The six pages cover animation and values; a validated form and selection controls;
 filterable lists, tables, trees, logs, and split panes; Unicode text editing and
 labels; a [BMP viewer](bmp-viewer.md) with file opening, zoom, and image
-details; and file picking. Menus, a command palette, dialogs,
-keyboard help, linked scrollbars, and responsive layouts connect the pages.
+details; and file picking.
 
 Use Tab for focus, Ctrl+Tab to change pages, Ctrl+P for commands, F1 for expanded
 help, F2 to cycle themes, F3 for motion, and Ctrl+C to exit. Choose a theme from
 the toolbar, the Actions → Theme menu, or the command palette. Selecting a preset
 also selects its ASCII setting; the toolbar's ASCII checkbox can override it.
-Motion has its own checkbox. The example offers deterministic headless checks:
+Motion has its own checkbox.
+
+Run headless checks or export a frame:
 
 ```sh
 ./build/examples/TermOx.examples.showcase --check

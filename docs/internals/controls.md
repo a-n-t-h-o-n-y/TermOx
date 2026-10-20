@@ -1,12 +1,11 @@
 # Activation and row selection
 
 [Controls](../controls.md) and [selection widgets](../selection-and-application.md)
-cover ordinary use. These helpers implement shared input and drawing behavior
-for built-in and custom controls.
+cover widget use.
 
 `<ox/controls.hpp>` supplies activation and index-selection functions without widgets,
 item ownership, signals, or event-loop state. Button, CheckBox, and RadioGroup use the
-same functions; custom controls can compose them with ordinary C++ state.
+same functions; custom controls can use them too.
 
 ```cpp
 #include <ox/controls.hpp>
@@ -34,7 +33,7 @@ Both return EventResponse and never schedule painting or emit callbacks.
 
 `<ox/selection.hpp>` supplies the shared row model and helpers.
 
-`RowSelection` is an ordinary value containing sorted selected `rows`, a keyboard
+`RowSelection` contains sorted selected `rows`, a keyboard
 `current` row, and a range `anchor`. `select_rows` composes replace, extend, toggle,
 and cursor-only actions; an optional predicate excludes disabled rows. `row_navigation`
 interprets arrows, page keys, Home, and End, while `row_target` finds an eligible row.
