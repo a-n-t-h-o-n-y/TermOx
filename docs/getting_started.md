@@ -119,13 +119,13 @@ and updates.
 | The executable is not at `build/my_app` | Check the selected generator and configuration; multi-configuration builds place it under `build/Release/`. |
 | Input, colors, or terminal restoration do not work in an IDE output panel | Run the executable in a terminal. Ctrl-C is the app's normal terminal exit path. |
 
-## Explore the Showcase
+## Run Explorer
 
 From `my_app/`, you can also build the larger app supplied by the dependency:
 
 ```sh
-cmake --build build --target TermOx.examples.showcase
-./build/external/TermOx/examples/TermOx.examples.showcase
+cmake --build build --target TermOx.examples.explorer
+./build/external/TermOx/examples/TermOx.examples.explorer
 ```
 
-The [Showcase walkthrough](../examples/showcase.md) lists its pages and controls.
+The [Explorer walkthrough](../examples/explorer.md) covers navigation and previews.

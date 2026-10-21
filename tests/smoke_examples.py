@@ -8,7 +8,6 @@ import select
 import struct
 import subprocess
 import sys
-import tempfile
 import termios
 import time
 
@@ -150,14 +149,6 @@ def main():
     smoke(examples / "TermOx.examples.snake", [b"s", b"j", b"l"])
     smoke(examples / "TermOx.examples.accumulator", [b"\x1b[<0;10;5M", b"\x1b[<0;10;5m", b"\t"])
 
-    with tempfile.NamedTemporaryFile(suffix=".bmp") as image:
-        # Two padded 24-bit rows, stored bottom-up.
-        image.write(struct.pack("<2sIHHI", b"BM", 62, 0, 0, 54))
-        image.write(struct.pack("<IiiHHIIiiII", 40, 1, 2, 1, 24, 0, 8, 0, 0, 0, 0))
-        image.write(bytes([255, 0, 0, 0, 0, 0, 255, 0]))
-        image.flush()
-        output = smoke(examples / "TermOx.examples.bmp_view", [], [image.name])
-        assert "▄".encode() in output, "BMP pixels were not painted"
 
 
 if __name__ == "__main__":

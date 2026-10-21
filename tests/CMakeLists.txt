@@ -71,3 +71,8 @@ target_link_libraries(TermOx.tests.arrangement_benchmarks PRIVATE TermOx)
 # Clipped pixel image painting, without terminal I/O.
 add_executable(TermOx.tests.pixel_benchmarks EXCLUDE_FROM_ALL pixel_benchmarks.cpp)
 target_link_libraries(TermOx.tests.pixel_benchmarks PRIVATE TermOx)
+
+# Explorer data handling and worker lifetime, plus the shared BMP preview widget.
+add_executable(TermOx.tests.explorer EXCLUDE_FROM_ALL explorer.test.cpp bmp_reader.test.cpp)
+target_link_libraries(TermOx.tests.explorer PRIVATE TermOx zzz)
+add_test(NAME TermOx.tests.explorer COMMAND TermOx.tests.explorer)

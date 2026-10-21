@@ -10,7 +10,7 @@ You need Git, CMake 3.18 or newer, and a C++20 compiler and standard library wit
 
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --target TermOx.tests.unit
+cmake --build build --target TermOx.tests.unit TermOx.tests.explorer
 ctest --test-dir build --output-on-failure
 ```
 
@@ -26,8 +26,10 @@ On macOS or Linux, check interactive input and terminal restoration with:
 cmake --build build --target TermOx.tests.renderer_terminal TermOx.tests.event_loop_terminal \
     TermOx.examples.pong TermOx.examples.pinbox \
     TermOx.examples.snake TermOx.examples.accumulator \
-    TermOx.examples.bmp_view
+    TermOx.examples.explorer TermOx.tests.explorer
 python3 tests/smoke_examples.py build
+ctest --test-dir build -R '^TermOx.tests.explorer$' --output-on-failure
+python3 tests/smoke_explorer.py build
 ```
 
 ## Documentation changes
@@ -37,18 +39,15 @@ Started. Keep those two copies in sync. Build any app whose walkthrough
 changes, and check its keyboard and mouse instructions in a terminal.
 Use relative links so the documentation works in a checkout and on GitHub.
 
-Images should come from current code. The Showcase's `--json` mode exports a
-painted frame with motion disabled. Regenerate the README image and BMP viewer image
-from the repository root:
+Images should come from current code. Explorer's `--json` mode exports a painted
+frame. Regenerate the README image from a temporary sample directory:
 
 ```sh
-cmake --build build --target TermOx.examples.showcase
-python3 docs/render-showcase.py docs/img/showcase.svg
-python3 docs/render-showcase.py docs/img/bmp-viewer.svg --page 4 --title "BMP viewer in TermOx Showcase"
+cmake --build build --target TermOx.examples.explorer
+python3 docs/render-explorer.py docs/img/explorer.svg
 ```
 
-These SVGs use actual frame text, widths, and colors; no terminal capture or image
-package is needed. Check the result at README display size after regenerating it.
+The SVG uses actual frame text, widths, and colors. Check it at README display size.
 
 Build the generated reference using [the Doxygen instructions](doxygen/README.md).
 The reference workflow checks comments on pull requests and publishes the HTML

@@ -66,34 +66,12 @@ target_link_libraries(
         TermOx
 )
 
-# BMP Viewer ---------------------------------------------------------------------------
-add_executable(TermOx.examples.bmp_view EXCLUDE_FROM_ALL
-    bmp_view.cpp
-)
-target_compile_options(
-    TermOx.examples.bmp_view
-    PRIVATE
-        -Wall
-        -Wextra
-        -Wpedantic
-)
-target_link_libraries(
-    TermOx.examples.bmp_view
-    PRIVATE
-        TermOx
-)
-
-# Complete interactive showcase, with optional deterministic headless checks/snapshots.
-add_executable(TermOx.examples.showcase EXCLUDE_FROM_ALL showcase.cpp)
-target_compile_options(TermOx.examples.showcase PRIVATE -Wall -Wextra -Wpedantic)
-target_link_libraries(TermOx.examples.showcase PRIVATE TermOx)
+# Browse directories with built-in widgets and asynchronous previews.
+add_executable(TermOx.examples.explorer EXCLUDE_FROM_ALL explorer.cpp)
+target_compile_options(TermOx.examples.explorer PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(TermOx.examples.explorer PRIVATE TermOx)
 
 # Adjustable live stress workloads and headless timings for the library's hot paths.
 add_executable(TermOx.examples.stress EXCLUDE_FROM_ALL stress.cpp)
 target_compile_options(TermOx.examples.stress PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(TermOx.examples.stress PRIVATE TermOx)
-
-# Copy the sample beside the build outputs; opening it does not depend on cwd.
-configure_file(assets/julia.bmp assets/julia.bmp COPYONLY)
-target_compile_definitions(TermOx.examples.showcase PRIVATE
-    TERMOX_SHOWCASE_BMP="${CMAKE_CURRENT_BINARY_DIR}/assets/julia.bmp")

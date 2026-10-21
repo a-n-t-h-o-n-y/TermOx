@@ -8,6 +8,41 @@
 #include "bmp_reader.hpp"
 
 namespace example {
+struct BmpData {
+    ox::Area extent;
+    std::vector<ox::RGB> pixels;
+    std::string name;
+    std::size_t bytes;
+    int depth;
+};
+
+// Decode owned data on a worker; attach it to a widget on the application thread.
+inline auto load_bmp(std::filesystem::path const& path) -> BmpData
+{
+    auto file = std::ifstream{path, std::ios::binary | std::ios::ate};
+    if (!file) throw std::runtime_error{"Could not open BMP file"};
+    auto length = file.tellg();
+    if (length < 54 || length > 32 * 1024 * 1024)
+        throw std::runtime_error{"BMP must be between 54 bytes and 32 MiB"};
+    auto bytes = std::vector<std::byte>((std::size_t)length);
+    file.seekg(0);
+    if (!file.read(reinterpret_cast<char*>(bytes.data()), length))
+        throw std::runtime_error{"Could not read BMP file"};
+    auto u32 = [&](int at) {
+        auto const* p = reinterpret_cast<unsigned char const*>(bytes.data()) + at;
+        return std::uint32_t(p[0]) | (std::uint32_t(p[1]) << 8) |
+               (std::uint32_t(p[2]) << 16) | (std::uint32_t(p[3]) << 24);
+    };
+    auto width = std::bit_cast<std::int32_t>(u32(18));
+    auto height = (std::int64_t)std::bit_cast<std::int32_t>(u32(22));
+    if (width <= 0 || height == 0 ||
+        (std::uint64_t)width * (std::uint64_t)std::abs(height) > 16 * 1024 * 1024)
+        throw std::runtime_error{"BMP exceeds the 16 megapixel limit"};
+    auto [extent, pixels] = parse_bmp(bytes);
+    return {extent, std::move(pixels), path.filename().string(), bytes.size(),
+            std::to_integer<int>(bytes[28]) | (std::to_integer<int>(bytes[29]) << 8)};
+}
+
 // Resample only visible terminal cells; zoom never allocates a scaled image.
 class BmpImage : public ox::Widget {
    public:
@@ -16,36 +51,14 @@ class BmpImage : public ox::Widget {
     auto measure(ox::Area, esc::WidthPolicy = {}) const -> ox::Area override
     { return {40, 10}; }
 
-    void load(std::filesystem::path const& path)
+    void load(std::filesystem::path const& path) { set_image(load_bmp(path)); }
+    void set_image(BmpData data)
     {
-        auto file = std::ifstream{path, std::ios::binary | std::ios::ate};
-        if (!file) throw std::runtime_error{"Could not open BMP file"};
-        auto length = file.tellg();
-        if (length < 54 || length > 32 * 1024 * 1024)
-            throw std::runtime_error{"BMP must be between 54 bytes and 32 MiB"};
-        auto bytes = std::vector<std::byte>((std::size_t)length);
-        file.seekg(0);
-        if (!file.read(reinterpret_cast<char*>(bytes.data()), length))
-            throw std::runtime_error{"Could not read BMP file"};
-        auto u32 = [&](int at) {
-            auto const* p = reinterpret_cast<unsigned char const*>(bytes.data()) + at;
-            return std::uint32_t(p[0]) | (std::uint32_t(p[1]) << 8) |
-                   (std::uint32_t(p[2]) << 16) | (std::uint32_t(p[3]) << 24);
-        };
-        auto width = std::bit_cast<std::int32_t>(u32(18));
-        auto height = (std::int64_t)std::bit_cast<std::int32_t>(u32(22));
-        if (width <= 0 || height == 0 ||
-            (std::uint64_t)width * (std::uint64_t)std::abs(height) > 16 * 1024 * 1024)
-            throw std::runtime_error{"BMP exceeds the 16 megapixel limit"};
-        // Commit only after decoding succeeds, retaining the previous image on error.
-        auto [extent, pixels] = parse_bmp(bytes);
-        auto name = path.filename().string();
-        extent_ = extent;
-        pixels_ = std::move(pixels);
-        name_ = std::move(name);
-        bytes_ = bytes.size();
-        depth_ = std::to_integer<int>(bytes[28]) |
-                 (std::to_integer<int>(bytes[29]) << 8);
+        extent_ = data.extent;
+        pixels_ = std::move(data.pixels);
+        name_ = std::move(data.name);
+        bytes_ = data.bytes;
+        depth_ = data.depth;
         fit();
     }
     auto pixel_size() const -> ox::Area { return extent_; }

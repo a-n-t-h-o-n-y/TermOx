@@ -826,7 +826,7 @@ Raw [before](../../tests/benchmark-results/views-before.csv),
 [process samples](../../tests/benchmark-results/views-samples.csv) include both sizes.
 
 Validation passes 343 unit cases and nine isolated allocation-fault cases, with all
-examples rebuilt, 13 PTY smoke checks, and the showcase structural checks. ASan+UBSan
+examples rebuilt, 13 PTY smoke checks, and the then-current widget demo structural checks. ASan+UBSan
 passes 49 targeted non-exception cases with all 40 TermOx source files instrumented.
 Streaming layout is compared against full reconstruction across wrapping modes,
 zero/narrow widths, CRLF, tabs, combining marks, emoji, and prefix eviction, including

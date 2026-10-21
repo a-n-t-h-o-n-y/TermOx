@@ -1,10 +1,13 @@
-"""Render a repeatable Showcase frame as SVG; no terminal or image packages needed."""
+"""Render Explorer with a temporary sample directory as SVG."""
 
 import argparse
 from html import escape
 import json
 from pathlib import Path
 import subprocess
+import shutil
+import tempfile
+import os
 
 
 def render(frame, title):
@@ -14,7 +17,7 @@ def render(frame, title):
     parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
              f'viewBox="0 0 {width} {height}" role="img" aria-labelledby="title desc">',
              f'<title id="title">{escape(title)}</title>',
-             '<desc id="desc">Rendered from the current Showcase frame with motion disabled.</desc>',
+             '<desc id="desc">Rendered from the current Explorer frame with motion disabled.</desc>',
              f'<rect width="{width}" height="{height}" fill="#141917"/>']
     text = []
     for y, row in enumerate(frame['rows']):
@@ -44,15 +47,26 @@ def render(frame, title):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', type=Path)
-    parser.add_argument('--executable', default='build/examples/TermOx.examples.showcase')
-    parser.add_argument('--page', type=int, default=0)
+    parser.add_argument('--executable', default='build/examples/TermOx.examples.explorer')
     parser.add_argument('--width', type=int, default=110)
     parser.add_argument('--height', type=int, default=30)
-    parser.add_argument('--title', default='TermOx Showcase')
+    parser.add_argument('--title', default='TermOx Explorer')
     args = parser.parse_args()
-    frame = json.loads(subprocess.check_output([
-        args.executable, '--json', '--theme', 'dark', '--page', str(args.page),
-        '--width', str(args.width), '--height', str(args.height)], text=True))
+    # A small, disposable dataset keeps the README independent of the developer's files.
+    with tempfile.TemporaryDirectory(prefix='termox-explorer-', dir='/tmp') as temporary:
+        folder = Path(temporary)
+        (folder / 'documents').mkdir()
+        (folder / 'images').mkdir()
+        (folder / 'notes.txt').write_text('Explorer\n\nBrowse folders and preview files.\n')
+        (folder / 'project.json').write_text('{"name": "TermOx", "language": "C++20"}\n')
+        (folder / 'readme.md').write_text('# Project notes\n\nKeyboard and mouse navigation.\n')
+        shutil.copy(Path(__file__).resolve().parent.parent / 'examples/assets/julia.bmp',
+                    folder / 'julia.bmp')
+        for item in folder.iterdir():
+            os.utime(item, (1704067200, 1704067200))
+        frame = json.loads(subprocess.check_output([
+            args.executable, str(folder), '--json', '--select', 'julia.bmp', '--theme', 'dark',
+            '--width', str(args.width), '--height', str(args.height)], text=True))
     args.output.write_text(render(frame, args.title), encoding='utf-8')
 
 

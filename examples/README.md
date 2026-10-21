@@ -1,6 +1,6 @@
 # Examples
 
-From a configured TermOx checkout ([setup](../README.md#build-and-run-the-showcase)),
+From a configured TermOx checkout ([setup](../README.md#build-and-run-explorer)),
 build an app by its target name and run it from `build/examples/`:
 
 ```sh
@@ -21,16 +21,11 @@ The target for each source below is `TermOx.examples.<filename without .cpp>`.
 | [pong.cpp](pong.cpp) | Pong | [Timers](../docs/core-concepts.md#timers) |
 | [snake.cpp](snake.cpp) | Snake | [Timers](../docs/core-concepts.md#timers) |
 | [pinbox.cpp](pinbox.cpp) | Interactive custom drawing | [Custom drawing](../docs/custom-widgets.md#painting) |
-| [bmp_view.cpp](bmp_view.cpp) | Load a BMP file and display its pixels; pass the filename as an argument | [Pixel images](../docs/custom-widgets.md#pixel-images) |
 | [accumulator.cpp](accumulator.cpp) | Numeric input and a running total | [Writing a custom widget](../docs/custom-widgets.md) |
-
-The [Showcase](showcase.md) also includes a [BMP viewer](bmp-viewer.md) with a bundled fractal,
-file opening, zoom, panning, and image details. `bmp_reader.hpp` and `bmp_image.hpp`
-are shared image helpers, not separate executables.
+| [explorer.cpp](explorer.cpp) | File browser with text and image previews | [Explorer walkthrough](explorer.md) |
 
 ## Development tools
 
 | Source | Purpose | Related guide |
 | --- | --- | --- |
-| [showcase.cpp](showcase.cpp) | Forms, data views, text, themes, and a BMP viewer | [Showcase walkthrough](showcase.md) |
 | [stress.cpp](stress.cpp) | Adjustable workloads and timing reports | [Stress Lab](stress.md) |

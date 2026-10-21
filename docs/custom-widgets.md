@@ -134,7 +134,7 @@ int main()
 Use `set_pixel` to update a pixel and request repaint, or `set_image` to replace
 row-major RGB data. Direct edits through `pixels()` or `at()` require a repaint request.
 Custom widgets can draw their own RGB storage with `paint_pixels(canvas, size, pixels)`.
-See [PixelGrid](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1_pixel_grid.html) and the [BMP viewer](../examples/bmp-viewer.md) for loading, zoom,
+See [PixelGrid](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1_pixel_grid.html) and the [Explorer image preview](../examples/explorer.md#controls) for loading, zoom,
 and panning.
 
 ## Scrollable widgets

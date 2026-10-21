@@ -3,7 +3,7 @@
 TermOx is a C++20 library for terminal user interfaces. It includes layouts, text
 editors, tables, trees, menus, and custom drawing, with keyboard and mouse input.
 
-[![TermOx Showcase with progress controls, a graph, and theme controls](docs/img/showcase.svg)](examples/showcase.md)
+[![Explorer with a directory tree, file table, and image preview](docs/img/explorer.svg)](examples/explorer.md)
 
 ## A counter
 
@@ -28,7 +28,7 @@ int main()
 }
 ```
 
-## Build and run the showcase
+## Build and run Explorer
 
 You need Git, CMake 3.18 or newer, and a C++20 compiler and standard library with
 `std::format` and coroutine support. CMake fetches the dependencies on the first configure.
@@ -37,8 +37,8 @@ You need Git, CMake 3.18 or newer, and a C++20 compiler and standard library wit
 git clone https://github.com/a-n-t-h-o-n-y/TermOx.git
 cd TermOx
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --target TermOx.examples.showcase
-./build/examples/TermOx.examples.showcase
+cmake --build build --target TermOx.examples.explorer
+./build/examples/TermOx.examples.explorer
 ```
 
 Ctrl-C exits.
