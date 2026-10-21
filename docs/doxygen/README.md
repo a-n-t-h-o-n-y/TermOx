@@ -1,72 +1,45 @@
-# Building and publishing the API reference
+# Building the API reference
 
-The reference is generated from `include/ox/` using **Doxygen 1.18.0** and the
-vendored **Doxygen Awesome 2.5.0** sidebar theme. Generated HTML stays under
-`build/` and is never committed.
+The reference is generated from `include/ox/` with Doxygen 1.18.0 and the vendored
+Doxygen Awesome 2.5.0 theme. Generated HTML stays under `build/`.
 
 ## Build locally
 
-Install Doxygen 1.18.0 from its [official release](https://github.com/doxygen/doxygen/releases/tag/Release_1_18_0),
+Install [Doxygen 1.18.0](https://github.com/doxygen/doxygen/releases/tag/Release_1_18_0),
 then run from the repository root:
 
 ```sh
 cmake -S docs/doxygen -B build/docs
 cmake --build build/docs --target TermOx.docs
+python3 tests/check_reference.py build/docs/html
 ```
 
-If Doxygen is not on PATH, pass `-DDOXYGEN_EXECUTABLE=/absolute/path/to/doxygen`
-to the configure command. Open `build/docs/html/index.html` to read the reference.
-For local browser testing, serve the output with
-`python3 -m http.server 8000 --directory build/docs/html`.
-To check local files and anchor links, run
-`python3 tests/check_reference.py build/docs/html`. CI runs this check before
-publishing; it uses only Python's standard library and makes no network requests.
-
-This standalone CMake project needs no C++ compiler, Graphviz, library dependency
-downloads, or JavaScript package manager. The regular library build can also add
-`TermOx.docs` by configuring with `-DTERMOX_BUILD_DOCUMENTATION=ON`.
+Open `build/docs/html/index.html` to read the reference. If Doxygen is not on PATH,
+pass `-DDOXYGEN_EXECUTABLE=/absolute/path/to/doxygen` when configuring.
+The regular library build can also enable this target with `-DTERMOX_BUILD_DOCUMENTATION=ON`.
 
 ## Publishing
 
-[The reference workflow](../../.github/workflows/reference.yml) builds pull requests
-and pushes to the repository's default branch. Pull requests upload an HTML artifact
-for inspection; default-branch pushes also publish through GitHub's Pages actions.
-Manual runs build the selected revision and publish only from the default branch.
-
-The reference is hosted at <https://a-n-t-h-o-n-y.github.io/TermOx/>. Pages uses
-**GitHub Actions** as its source. No generated-file branch or publishing token is
-needed. Only the deployment job has Pages write permissions.
+[The reference workflow](../../.github/workflows/reference.yml) checks pull requests
+and uploads their HTML as an artifact. Pushes to the default branch publish the
+[API reference](https://a-n-t-h-o-n-y.github.io/TermOx/) through GitHub Pages.
 
 ## Inline documentation
 
-Public declarations and enum values must have descriptions. The build fails on
-missing descriptions, malformed comments, and parameter-name mismatches; diagnostics
-are written to `build/docs/warnings.log`. Private members are excluded. Shared
-implementation bases are parsed so public classes retain their inherited methods,
-options, and signals, listed directly on each class page. Trivial overrides may
-inherit their base documentation; document them explicitly when behavior differs.
+Describe public declarations and enum values. Document behavior that callers need
+to know, such as ownership, thread restrictions, exceptions, and callback effects.
+Avoid restating the signature. Guides and app walkthroughs stay in Markdown.
 
-Keep contracts beside their declarations: ownership and borrowed lifetimes, return
-values, signal emission, exceptions, thread restrictions, units, and layout/repaint
-effects. Describe behavior without restating the signature. Document parameters
-when their meaning or constraints need explanation; a parameter list is not required
-for every self-explanatory argument. Small code blocks belong beside the interface
-they demonstrate. Compile changed snippets before publishing.
+Missing descriptions and malformed comments fail the build; see
+`build/docs/warnings.log`. Inherited members appear on each class page. Overrides
+can inherit comments when their behavior is unchanged.
 
-Guides and app walkthroughs remain Markdown in the repository. The generated site
-is the API reference. Escape's re-exported types are summarized in the glyph and
-events header comments, with links to their upstream declarations.
+## Updating Doxygen or the theme
 
-## Appearance and versions
+Update the CMake version requirement, CI download and SHA-256 checksum, and this
+guide together. Check light/dark pages, search, and classes with templates and overloads.
 
-`termox.css` supplies TermOx's copper accents and green surfaces. The upstream
-sidebar theme and dark-mode toggle are unmodified; their version, source commit,
-and license are recorded in `vendor/doxygen-awesome/`. CMake generates Doxygen's
-own header template and adds the theme's documented dark-mode initialization.
-Navigation uses Doxygen's static menus with the sidebar tree; this avoids the
-incorrect alphabetical jump links generated by 1.18.0's dynamic menus.
-
-CI downloads the pinned official Linux binary and verifies its SHA-256 checksum.
-When updating Doxygen, update the exact CMake requirement, CI download and checksum,
-and this guide together. Check theme compatibility and inspect both light and dark
-pages, search results, and a class with templates and overloaded methods.
+`termox.css` supplies the project colors. The vendored theme's version, source commit,
+and license are in `vendor/doxygen-awesome/`. CMake adds its dark-mode initialization
+to Doxygen's generated header. Static menus avoid incorrect alphabetical jump links
+in Doxygen 1.18.0's dynamic menus.

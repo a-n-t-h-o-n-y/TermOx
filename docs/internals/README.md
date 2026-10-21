@@ -22,6 +22,3 @@ byte-to-cell mapping for painting, caret movement, and hit testing.
 
 - [Performance](performance.md): benchmark commands, recorded workloads, and optimization results.
 - [Contributing](../contributing.md): current build, test, and documentation checks.
-
-Historical measurements describe the recorded runs. Use the current test commands
-when checking a change.
