@@ -137,6 +137,32 @@ Custom widgets can draw their own RGB storage with `paint_pixels(canvas, size, p
 See [PixelGrid](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1_pixel_grid.html) and the [Explorer image preview](../examples/explorer.md#controls) for loading, zoom,
 and panning.
 
+## Braille dots
+
+`DotGrid` packs 2 × 4 dots into each terminal cell. It suits curves, plots, and
+line drawings; use `PixelGrid` when you need independently colored pixels.
+
+```cpp
+auto dots = ox::DotGrid{ox::Area{80, 40}}; // 40 columns × 10 rows
+dots.set_dot({7, 9});
+dots.set_cell_colors({3, 2}, {
+    .foreground = ox::RGB{0xffcc88},
+    .background = ox::RGB{0x182d24},
+});
+```
+
+`set_dot` and `dot` use dot coordinates. `set_cell_colors` and `cell_colors` use
+terminal-cell coordinates: all eight dots share the foreground, and the background
+shows between them. Coordinates start at the top left. `dot_size()` and `cell_size()`
+report the two extents; partial edge cells round up, with unused dots off.
+
+Use `set_dot(point, false)` to erase one dot, `clear()` to erase all dots while
+keeping colors, or `reset(size, colors)` to replace the grid. Changes request repaint
+automatically. Invalid coordinates throw. The grid clips without scaling and needs
+a terminal font with single-column Braille glyphs; empty cells are spaces.
+
+See [DotGrid](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1_dot_grid.html) for the API.
+
 ## Scrollable widgets
 
 Implement `Scrollable<T>` from `<ox/scrollbar.hpp>` to use [linked scrollbars](layout.md#link-a-scrollbar):

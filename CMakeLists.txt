@@ -43,6 +43,7 @@ add_library(TermOx STATIC
     src/lineedit.cpp
     src/routing.cpp
     src/focus.cpp
+    src/dotgrid.cpp
     src/pixelgrid.cpp
     src/put.cpp
     src/radiogroup.cpp
@@ -95,6 +96,7 @@ add_library(TermOx STATIC
     include/ox/layout.hpp
     include/ox/lineedit.hpp
     include/ox/detail/text_control.hpp
+    include/ox/dotgrid.hpp
     include/ox/pixelgrid.hpp
     include/ox/put.hpp
     include/ox/radiogroup.hpp

@@ -28,6 +28,7 @@
 #include <ox/listview.hpp>
 #include <ox/menu.hpp>
 #include <ox/motion.hpp>
+#include <ox/dotgrid.hpp>
 #include <ox/pixelgrid.hpp>
 #include <ox/popup.hpp>
 #include <ox/put.hpp>

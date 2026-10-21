@@ -12,7 +12,7 @@ in the sidebar.
 | Controls and data | ox::Button, ox::ListView, ox::DataTable, ox::TreeView, ox::Form |
 | Text | ox::Label, ox::LineEdit, ox::TextBox |
 | Appearance | ox::Theme, ox::Palette, ox::Animation, ox::Command |
-| Drawing | ox::Canvas, ox::Frame, ox::PixelGrid |
+| Drawing | ox::Canvas, ox::Frame, ox::PixelGrid, ox::DotGrid |
 
 ## Guides and apps
 

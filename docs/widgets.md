@@ -16,6 +16,7 @@ methods, and signals. [Layout](layout.md) covers containers and scrollbars;
 | Show progress | [ProgressBar, Spinner](#progress-and-activity) |
 | Open a dialog, file picker, menu, or palette | [Recipes](recipes.md) |
 | Display pixels or draw custom content | [Custom widgets](custom-widgets.md) |
+| Draw fine lines with Braille dots | [DotGrid](custom-widgets.md#braille-dots) |
 
 ## Labels
 

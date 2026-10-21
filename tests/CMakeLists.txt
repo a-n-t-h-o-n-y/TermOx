@@ -11,6 +11,7 @@ add_executable(TermOx.tests.unit EXCLUDE_FROM_ALL
     audit.test.cpp
     controls.test.cpp
     decorations.test.cpp
+    dotgrid.test.cpp
     pixelgrid.test.cpp
     bmp_reader.test.cpp
     scroll.test.cpp
