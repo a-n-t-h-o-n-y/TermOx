@@ -15,6 +15,7 @@
 #include <ox/timer.hpp>
 
 namespace ox {
+class Application;
 
 /** Owns events, timer scheduling, and frame requests independently of terminal I/O.
  * post() is thread safe. Dispatch, timers, and painting run on the owning thread.
@@ -111,6 +112,9 @@ class EventLoop {
         if (!exit_code_) merge(result, tick_animations(now));
         return result;
     }
+
+    /** Paint an application's pending frame, clearing directly to its theme background. */
+    auto paint(Application& application) -> bool;
 
     /** Paint once only when a frame is pending and the loop has not quit; return whether to present it.
      * When handler supplies paint(Canvas) returning Cursor, clear screen first and retain its caret.

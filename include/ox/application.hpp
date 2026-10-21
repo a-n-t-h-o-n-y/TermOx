@@ -138,6 +138,8 @@ class Application {
     auto paint(Canvas canvas) -> Cursor;
 
    private:
+    friend class EventLoop;
+    auto paint_widgets(Canvas canvas) -> Cursor;
     std::string clipboard_text_;
     LifetimeView<Widget> head_;
     EventLoop loop_;

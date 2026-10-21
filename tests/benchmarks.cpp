@@ -324,6 +324,20 @@ void paint_benchmarks()
             }
             return frame.row(0)[0].text[0];
         });
+        auto canvas = ox::Canvas{frame};
+        for (auto const& [name, a, b] : std::array{std::tuple{"ascii", U"x", U"y"},
+                                                   std::tuple{"braille", U"⠿", U"⣿"},
+                                                   std::tuple{"combining", U"é", U"á"},
+                                                   std::tuple{"wide", U"界", U"語"}}) {
+            measure("paint.canvas." + std::string{name} + "." + suffix, 100,
+                    [&](int i) {
+                        for (int y = 0; y < size.height; ++y)
+                            for (int x = 0; x < size.width;
+                                 x += name == std::string_view{"wide"} ? 2 : 1)
+                                canvas.write({x, y}, i % 2 ? a : b);
+                        return frame.row(0)[0].text[0];
+                    });
+        }
         auto other = frame;
         measure("paint.compare.equal." + suffix, 1000, [&](int) {
             auto equal = std::size_t{0};
@@ -391,6 +405,20 @@ void application_benchmarks()
             app.step();
             return present();
         });
+    }
+    for (auto size : {ox::Area{200, 60}, ox::Area{480, 160}}) {
+        auto widget = ox::Widget{};
+        auto app = ox::Application{widget};
+        app.set_theme(ox::Theme::dark());
+        app.dispatch(esc::Resize{size});
+        measure("application.themed-background." + std::to_string(size.width) + "x" +
+                    std::to_string(size.height),
+                100, [&](int) {
+                    app.request_repaint();
+                    app.paint();
+                    auto const& cell = app.loop().screen[{0, 0}];
+                    return cell.columns + cell.style.background.index();
+                });
     }
 }
 

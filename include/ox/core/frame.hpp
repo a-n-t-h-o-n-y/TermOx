@@ -16,6 +16,7 @@
 #include <ox/core/glyph.hpp>
 
 namespace ox {
+namespace detail { class SingleColumnPainter; }
 class Canvas;
 
 /** A leading cell owns one grapheme. Continuations have empty text and columns == 0. */
@@ -79,6 +80,7 @@ class Frame {
     auto write(Point at, std::u32string_view grapheme, Style style = {}) -> bool;
 
    private:
+    friend class detail::SingleColumnPainter;
     friend class Canvas;
     friend class Renderer;
     // A retained identity prevents address reuse and equal revisions on unrelated
@@ -91,7 +93,9 @@ class Frame {
     esc::WidthPolicy policy_;
     std::vector<esc::ScalarWidthOverride> overrides_;
 
-    auto write(Point at, std::u32string_view grapheme, Style style, Rect clip) -> bool;
+    // Callers validate style/text once; clip is already intersected with the frame.
+    auto write_validated(Point at, std::u32string_view grapheme, Style style,
+                         Rect clip, std::size_t width) -> bool;
     auto restyle(Point at, Style style, Rect clip) -> bool;
     auto index(Point point) const -> std::size_t;
 };

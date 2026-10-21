@@ -1,5 +1,7 @@
 #include <ox/pixelgrid.hpp>
 
+#include "core/single_column_painter.hpp"
+
 #include <limits>
 #include <stdexcept>
 #include <utility>
@@ -46,13 +48,14 @@ void paint_pixels(Canvas canvas,
             "Pixel drawing requires a one-column lower-half block"};
     }
     auto const width = (std::size_t)size.width;
+    auto painter = detail::SingleColumnPainter{canvas};
     for (auto y = clip.at.y; y < clip.at.y + clip.size.height; ++y) {
         auto const row = (std::size_t)y * 2;
         auto index = row * width + (std::size_t)clip.at.x;
         auto const bottom = row + 1 < (std::size_t)size.height;
         for (auto x = clip.at.x; x < clip.at.x + clip.size.width; ++x, ++index) {
-            canvas.write(
-                {x, y}, U"▄",
+            painter.write(
+                {x, y}, U'▄',
                 {.background = pixels[index],
                  .foreground = bottom ? Color{pixels[index + width]} : odd_pixel});
         }

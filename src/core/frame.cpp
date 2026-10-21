@@ -189,22 +189,40 @@ void Frame::clear(Style style)
 }
 
 auto Frame::write(Point at, std::u32string_view grapheme, Style style) -> bool
-{ return this->write(at, grapheme, style, Rect{{0, 0}, size_}); }
-
-auto Frame::write(Point at, std::u32string_view grapheme, Style style, Rect clip)
-    -> bool
 {
     validate(style);
     auto const width = esc::grapheme_width(grapheme, this->width_policy());
     if (!width || *width == 0) {
         throw std::invalid_argument{"Expected a printable grapheme"};
     }
-    clip = intersection(clip, Rect{{0, 0}, size_});
+    return write_validated(at, grapheme, style, Rect{{0, 0}, size_}, *width);
+}
+
+auto Frame::write_validated(Point at,
+                            std::u32string_view grapheme,
+                            Style style,
+                            Rect clip,
+                            std::size_t width) -> bool
+{
     if (!contains(clip, at) ||
-        *width > (std::size_t)((std::int64_t)clip.at.x + clip.size.width - at.x)) {
+        width > (std::size_t)((std::int64_t)clip.at.x + clip.size.width - at.x)) {
         return false;
     }
-    auto const last = Point{at.x + (int)*width - 1, at.y};
+    auto& target =
+        cells_[(std::size_t)at.y * (std::size_t)size_.width + (std::size_t)at.x];
+    // A one-column replacement cannot touch adjacent graphemes. Preserve the
+    // general path for wide cells and their continuation columns.
+    if (width == 1 && target.columns == 1) {
+        auto const same_text = target.text == grapheme;
+        if (same_text && target.style == style) return true;
+        // Reuse the string for color-only changes; assign also permits text
+        // borrowed from this cell, including a shorter substring.
+        if (!same_text) target.text.assign(grapheme);
+        target.style = style;
+        changed(at.y);
+        return true;
+    }
+    auto const last = Point{at.x + (int)width - 1, at.y};
     auto const first_lead = this->lead_at(at);
     auto const last_lead = this->lead_at(last);
     auto const end = last_lead.x + (int)(*this)[last_lead].columns;
@@ -215,11 +233,11 @@ auto Frame::write(Point at, std::u32string_view grapheme, Style style, Rect clip
         return false;
     }
     auto const& existing = (*this)[at];
-    if (existing.columns == *width && existing.text == grapheme &&
+    if (existing.columns == width && existing.text == grapheme &&
         existing.style == style) {
         return true;
     }
-    auto replacement = Cell{std::u32string{grapheme}, style, *width};
+    auto replacement = Cell{std::u32string{grapheme}, style, width};
     changed(at.y);
     for (int x = first_lead.x; x < end; ++x) {
         auto const index = this->index({x, at.y});

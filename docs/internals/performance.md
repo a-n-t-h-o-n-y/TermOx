@@ -32,7 +32,7 @@ For example, save text layout results as CSV:
 ./build-release/tests/TermOx.tests.benchmarks --layout > layout.csv
 ```
 
-Container arrangement and PixelGrid painting have separate executables:
+Container arrangement and grid painting have separate executables:
 
 ```sh
 cmake --build build-release --target \
@@ -95,9 +95,10 @@ Allocation counts measure calls, not bytes, and exclude aligned allocations.
 Edits and frame mutations are included when they are part of the workload.
 Renderer timings include encoding but no writes to a terminal or emulator.
 
-The pixel benchmark uses three warmups and five samples of 20 operations. It
-measures painting and a checksum scan of the resulting frame, without allocation
-counts, image decoding, or resampling.
+The grid benchmark measures clipped PixelGrid images and animated DotGrid/PixelGrid
+frames, using five samples of 20 paints. Clipped-image timings include a checksum
+scan; animated grids prepare their data and scan checksums outside the timed section.
+Neither includes allocation counts, image decoding, or resampling.
 
 Small timing changes may be noise. These results describe the measured workloads;
 interactive performance also depends on terminal size, font, emulator, and I/O.

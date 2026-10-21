@@ -1,4 +1,7 @@
 #include <ox/dotgrid.hpp>
+
+#include <array>
+#include "core/single_column_painter.hpp"
 #include <algorithm>
 #include <limits>
 #include <stdexcept>
@@ -95,19 +98,25 @@ auto DotGrid::measure(Area available, esc::WidthPolicy) const -> Area
 auto DotGrid::paint(Canvas canvas) -> Cursor
 {
     auto clip = intersection(canvas.visible(), {{}, cell_size()});
-    // Check each used glyph, including scalar-specific width overrides, before writing.
+    // Validate each distinct visible glyph once, including width overrides, before
+    // mutating the frame. Unused glyphs need not match this terminal's policy.
+    auto checked = std::array<bool, 256>{};
     for (int y = clip.at.y; y < clip.at.y + clip.size.height; ++y)
         for (int x = clip.at.x; x < clip.at.x + clip.size.width; ++x) {
-            auto c = glyph(cells_[index({x, y})].dots);
+            auto mask = cells_[(std::size_t)y * cell_size().width + x].dots;
+            if (checked[mask]) continue;
+            checked[mask] = true;
+            auto c = glyph(mask);
             if (esc::grapheme_width(std::u32string_view{&c, 1}, canvas.width_policy()) !=
                 std::optional<std::size_t>{1})
                 throw std::invalid_argument{"DotGrid requires one-column Braille glyphs"};
         }
+    auto painter = detail::SingleColumnPainter{canvas};
     for (int y = clip.at.y; y < clip.at.y + clip.size.height; ++y)
         for (int x = clip.at.x; x < clip.at.x + clip.size.width; ++x) {
-            auto const& cell = cells_[index({x, y})];
+            auto const& cell = cells_[(std::size_t)y * cell_size().width + x];
             auto c = glyph(cell.dots);
-            canvas.write({x, y}, std::u32string_view{&c, 1},
+            painter.write({x, y}, c,
                          appearance({.background = cell.colors.background,
                                      .foreground = cell.colors.foreground}));
         }

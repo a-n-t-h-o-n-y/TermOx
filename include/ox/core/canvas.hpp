@@ -6,6 +6,7 @@
 #include <ox/core/frame.hpp>
 
 namespace ox {
+namespace detail { class SingleColumnPainter; }
 
 /** A non-owning view with local coordinates and an inherited clip.
  * Views retain their geometry after frame resize, intersecting the current bounds.
@@ -63,6 +64,7 @@ class Canvas {
     auto restyle(Point at, Style style) const -> bool;
 
    private:
+    friend class detail::SingleColumnPainter;
     Frame& frame_;
     Point at_;
     Area size_;

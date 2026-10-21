@@ -48,7 +48,8 @@ auto Canvas::write(Point at, std::u32string_view grapheme, Style style) const ->
         throw std::invalid_argument{"Expected a printable grapheme"};
     }
     if (!this->contains(at)) { return false; }
-    return frame_.write(this->to_global(at), grapheme, style, this->global_clip());
+    return frame_.write_validated(this->to_global(at), grapheme, style,
+                                   this->global_clip(), *width);
 }
 
 auto Canvas::restyle(Point at, Style style) const -> bool

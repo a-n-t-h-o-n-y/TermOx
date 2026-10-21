@@ -22,6 +22,7 @@ add_executable(TermOx.tests.unit EXCLUDE_FROM_ALL
     widget_api.test.cpp
     event_loop.test.cpp
     frame.test.cpp
+    paint_pipeline.test.cpp
     renderer.test.cpp
     layout.test.cpp
     layout_widgets.test.cpp

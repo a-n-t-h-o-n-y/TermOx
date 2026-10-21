@@ -8,7 +8,8 @@
 `EventLoop::step(handler, now)` processes a snapshot of posted events, then due timers
 and animations. Callback posts wait for the next step. Input order is preserved;
 repaint requests coalesce into one pending frame. Quit stops the batch and suppresses
-painting. `paint(handler)` clears and paints once when a frame is pending. Resize
+painting. `paint(handler)` clears and paints once when a frame is pending. For an
+`Application`, clearing applies the theme background in the same pass. Resize
 resets frame storage before calling a handler's resize overload, if present.
 
 ## Waiting and terminal input

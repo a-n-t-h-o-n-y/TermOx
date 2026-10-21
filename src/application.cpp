@@ -569,9 +569,23 @@ auto Application::handle(esc::Resize const& event) -> EventResponse
     return combine({.handled = true, .repaint = true}, synchronize());
 }
 
+auto EventLoop::paint(Application& app) -> bool
+{
+    if (!repaint_ || exit_code_) return false;
+    repaint_ = false;
+    screen.clear(app.theme_.styled ? theme_style({}, app.theme_) : Style{});
+    cursor = app.paint_widgets(Canvas{screen});
+    return true;
+}
+
 auto Application::paint(Canvas canvas) -> Cursor
 {
     if (theme_.styled) fill(canvas, theme_style({}, theme_));
+    return paint_widgets(canvas);
+}
+
+auto Application::paint_widgets(Canvas canvas) -> Cursor
+{
     auto const snapshot = tree_;
     auto cursor = Cursor{};
     if (!snapshot.empty()) {
