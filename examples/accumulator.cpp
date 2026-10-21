@@ -30,6 +30,7 @@ using namespace ox;
                           .foreground = colors::bright_cyan,
                           .enabled = {},
                           .disabled = {}},
+        .height_policy = SizePolicy::flex(),
     }};
 }
 
