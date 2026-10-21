@@ -21,3 +21,4 @@ The target for each source below is `TermOx.examples.<filename without .cpp>`.
 | [pinbox.cpp](pinbox.cpp) | Interactive custom drawing | [Custom drawing](../docs/custom-widgets.md#painting) |
 | [accumulator.cpp](accumulator.cpp) | Numeric input and a running total | [Writing a custom widget](../docs/custom-widgets.md) |
 | [explorer.cpp](explorer.cpp) | File browser with text and image previews | [Tables and trees](../docs/widgets.md#tables-and-trees) |
+| [phase.cpp](phase.cpp) | Orbit, Bloom, Loom, and Flock simulations | [Custom drawing](../docs/custom-widgets.md#painting) |

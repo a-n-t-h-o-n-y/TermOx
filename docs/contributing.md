@@ -18,9 +18,10 @@ For input or terminal changes, also run the POSIX terminal checks:
 ```sh
 cmake --build build --target TermOx.tests.renderer_terminal TermOx.tests.event_loop_terminal \
     TermOx.examples.pong TermOx.examples.pinbox TermOx.examples.snake \
-    TermOx.examples.accumulator TermOx.examples.explorer
+    TermOx.examples.accumulator TermOx.examples.explorer TermOx.examples.phase
 python3 tests/smoke_examples.py build
 python3 tests/smoke_explorer.py build
+python3 tests/smoke_phase.py build
 ```
 
 ## Making changes

@@ -70,3 +70,8 @@ target_link_libraries(
 add_executable(TermOx.examples.explorer EXCLUDE_FROM_ALL explorer.cpp)
 target_compile_options(TermOx.examples.explorer PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(TermOx.examples.explorer PRIVATE TermOx)
+
+# Four interactive simulations with retained scenes and compact controls.
+add_executable(TermOx.examples.phase EXCLUDE_FROM_ALL phase.cpp)
+target_compile_options(TermOx.examples.phase PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(TermOx.examples.phase PRIVATE TermOx)
