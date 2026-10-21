@@ -20,5 +20,5 @@ byte-to-cell mapping for painting, caret movement, and hit testing.
 
 ## Performance and development
 
-- [Performance](performance.md): benchmark commands, recorded workloads, and optimization results.
+- [Performance](performance.md): benchmark commands, workloads, and revision comparisons.
 - [Contributing](../contributing.md): current build, test, and documentation checks.
