@@ -138,17 +138,12 @@ application destruction still attempts detachment if a focus-out callback throws
 The root is borrowed and should outlive the application; its tracked identity follows moves. The library is
 single-threaded for widget mutation; background work should post an event-loop action.
 
-Headless regression tests exercise nested clipping and translation, overlap, bubbling,
-Tab navigation, focus recovery and relocation, hover transitions, callback removal,
-reentrant focus changes, explicit repaint and quit, timer eligibility, and checked
-coordinate arithmetic. Pseudo-terminal smoke tests cover interactive input and terminal restoration.
-
 Traversal and attachment storage are reused. An unchanged tree skips attachment
 reconciliation, and an unchanged hover path needs no allocation. Focus consumes its
 borrowed tree snapshot before invoking callbacks, so reentrant dispatch can safely
 replace application storage. Failed attachment attempts remain pending and are retried;
 a foreign widget cannot bypass ownership checks on a subsequent unchanged traversal.
-See [performance benchmarks](performance.md) for measured routing workloads.
+See [performance benchmarks](performance.md) for running the routing workloads.
 
 See [Widgets](../widgets.md#lists-and-dropdowns) for lists and dropdowns,
 [Layout](../layout.md#pages-and-split-panes) for tabs, and

@@ -15,6 +15,6 @@ Then use the guides you need:
 
 The [API reference](https://a-n-t-h-o-n-y.github.io/TermOx/) documents individual
 methods, options, and signals. [Examples](../examples/README.md) contains runnable
-apps and walkthroughs.
+apps and build instructions.
 
 For library development, see [Contributing](contributing.md).

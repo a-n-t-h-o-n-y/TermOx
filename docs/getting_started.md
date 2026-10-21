@@ -127,5 +127,3 @@ From `my_app/`, you can also build the larger app supplied by the dependency:
 cmake --build build --target TermOx.examples.explorer
 ./build/external/TermOx/examples/TermOx.examples.explorer
 ```
-
-The [Explorer walkthrough](../examples/explorer.md) covers navigation and previews.

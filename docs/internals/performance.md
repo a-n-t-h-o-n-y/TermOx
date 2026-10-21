@@ -1,7 +1,6 @@
 # Performance benchmarks
 
-Use the headless benchmarks to measure library work without terminal I/O. For an
-interactive workload and per-frame timings, see the [stress example](../../examples/stress.md).
+Use the headless benchmarks to measure library work without terminal I/O.
 
 ## Build and run
 

@@ -71,9 +71,3 @@ propagate the exception; no partially encoded result is returned.
 frame creation and flushing for unchanged frames, changes cursor visibility only when
 needed, and invalidates its renderer if presentation fails. On shutdown it resets the
 retained style before Escape restores session modes.
-
-Regression tests cover exact cursor/style sequences, storage reuse, capability
-adaptation, themes, Unicode boundaries and footprint replacement, scrolling, shrinking
-and growing, invalidation, failed encoding, and randomized edits replayed into a
-headless display. Example smoke tests exercise input, resizing, and restoration
-through a pseudo-terminal.

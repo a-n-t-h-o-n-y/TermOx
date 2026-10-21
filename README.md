@@ -3,7 +3,7 @@
 TermOx is a C++20 library for terminal user interfaces. It includes layouts, text
 editors, tables, trees, menus, and custom drawing, with keyboard and mouse input.
 
-[![Explorer with a directory tree, file table, and image preview](docs/img/explorer.svg)](examples/explorer.md)
+[![Explorer with a directory tree, file table, and image preview](docs/img/explorer.svg)](examples/explorer.cpp)
 
 ## A counter
 
@@ -48,7 +48,7 @@ Ctrl-C exits.
 - [Getting Started](docs/getting_started.md): create, build, and run your own project.
 - [Guides](docs/README.md): core concepts, layout, widgets, and recipes.
 - [API reference](https://a-n-t-h-o-n-y.github.io/TermOx/): methods, options, and signals.
-- [Apps](examples/README.md): source files, build targets, and walkthroughs.
+- [Apps](examples/README.md): source files and build targets.
 
 See [Contributing](docs/contributing.md) for build and test instructions.
 TermOx is released under the [MIT license](LICENSE).

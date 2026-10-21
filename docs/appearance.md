@@ -163,5 +163,4 @@ run on the application thread. Immediate transitions do not invoke them, so mode
 changes belong in the command that starts the transition.
 
 [Animation](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1_animation.html) documents callback and lifetime behavior. Use [Tween](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1_tween.html) for
-interpolation without a widget or scheduler. The [Explorer](../examples/explorer.md) View menu switches between dark, light, and
-terminal themes.
+interpolation without a widget or scheduler.

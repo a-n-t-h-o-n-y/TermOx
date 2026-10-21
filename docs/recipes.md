@@ -267,5 +267,5 @@ If selection must survive filtering, retain a record ID in application state and
 find its new view index after replacement. Table indices are not permanent IDs.
 
 Add [scrollbars](layout.md#link-a-scrollbar) for large views.
-See [DataTable](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1_data_table.html) for updates and sorting, and [Explorer](../examples/explorer.md)
+See [DataTable](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1_data_table.html) for updates and sorting, and [Explorer source](../examples/explorer.cpp)
 for filtering, header sorting, and linked scrolling together.

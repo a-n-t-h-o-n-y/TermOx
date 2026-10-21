@@ -38,6 +38,7 @@ int main()
 - [Painting](#painting)
 - [Styles and glyphs](#styles-and-glyphs)
 - [Pixel images](#pixel-images)
+- [Braille dots](#braille-dots)
 - [Scrollable widgets](#scrollable-widgets)
 - [Headless testing](#headless-testing)
 
@@ -134,8 +135,8 @@ int main()
 Use `set_pixel` to update a pixel and request repaint, or `set_image` to replace
 row-major RGB data. Direct edits through `pixels()` or `at()` require a repaint request.
 Custom widgets can draw their own RGB storage with `paint_pixels(canvas, size, pixels)`.
-See [PixelGrid](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1_pixel_grid.html) and the [Explorer image preview](../examples/explorer.md#controls) for loading, zoom,
-and panning.
+See [PixelGrid](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1_pixel_grid.html) for the API.
+Explorer’s [image preview](../examples/bmp_image.hpp) adds loading, zoom, and panning.
 
 ## Braille dots
 

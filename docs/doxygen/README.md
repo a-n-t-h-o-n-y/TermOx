@@ -28,7 +28,7 @@ and uploads their HTML as an artifact. Pushes to the default branch publish the
 
 Describe public declarations and enum values. Document behavior that callers need
 to know, such as ownership, thread restrictions, exceptions, and callback effects.
-Avoid restating the signature. Guides and app walkthroughs stay in Markdown.
+Avoid restating the signature. Concepts and examples belong in the guides.
 
 Missing descriptions and malformed comments fail the build; see
 `build/docs/warnings.log`. Inherited members appear on each class page. Overrides

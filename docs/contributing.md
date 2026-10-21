@@ -44,4 +44,3 @@ python3 docs/render-explorer.py docs/img/explorer.svg
 - [API reference build](doxygen/README.md)
 - [Internals](internals/README.md)
 - [Performance benchmarks](internals/performance.md)
-- [Stress Lab](../examples/stress.md)

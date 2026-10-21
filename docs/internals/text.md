@@ -31,6 +31,8 @@ For application editing commands and validation, start with [Text editing](../wi
 - [Layout and display](#layout-and-display)
 - [Storage and caching](#storage-and-caching)
 - [Text view composition](#text-view-composition)
+- [Line-number caching](#line-number-caching)
+- [Paste routing and widget notifications](#paste-routing-and-widget-notifications)
 
 ## Text, carets, and selection
 
@@ -152,7 +154,6 @@ partial clipping; other graphemes retain complete footprints.
 
 TextLayout caches terminal coordinates alongside byte boundaries during construction.
 Caret and hit queries use binary searches without decoding or measuring text again.
-See [performance benchmarks](performance.md) for timings and the storage tradeoff.
 
 TextEdit reuses working text and boundary buffers and commits only after preparation
 and history allocation succeed. Failed edits, undo, and redo preserve text, boundaries,
@@ -175,15 +176,14 @@ and control rejection create no discarded decoded or normalized strings. Working
 metadata, row, coordinate, and override buffers retain capacity between updates.
 Failed updates leave the owned snapshot, policy, coordinates, and existing row storage
 intact. Cached columns add one integer per grapheme; reusable buffers retain memory
-proportional to the largest document. See the layout construction measurements in the
-[performance guide](performance.md).
+proportional to the largest document. Use the [layout benchmarks](performance.md)
+to measure these paths.
 
 ## Text view composition
 
-`<ox/text_view.hpp>` provides the functions used by both widgets. They operate on an
-ordinary `TextEdit`, `TextLayout`, and `Point` scroll value; there is no required widget,
-base class, controller, or additional editor state wrapper. Scroll uses display columns
-and rows. Editing caret/selection values remain UTF-8 byte offsets.
+`<ox/text_view.hpp>` provides the functions shared by LineEdit and TextBox. They
+operate on a `TextEdit`, `TextLayout`, and `Point` scroll value without requiring a
+widget. Scroll uses display columns and rows; carets and selections use UTF-8 byte offsets.
 
 ```cpp
 #include <ox/text_view.hpp>
@@ -214,10 +214,10 @@ editor.set_caret(ox::text_offset(layout, {4, 0}, size, align, scroll));
 `edit_text` has key and streaming-paste overloads. Both refresh layout and scroll after
 an edit; the key overload prepares layout before geometry-dependent bindings. They
 use the layout's owned width policy and tab width, return effects, and do not apply
-them to an application. An optional scalar predicate uses an empty `std::function`
-to mean no filtering. `LineEdit::accept_character` uses this scalar predicate;
-clear it with `accept_character = {}`. The separate `validator` checks the complete
-text on submission. See [filtering and submission](../widgets.md#text-editing).
+them to an application. An optional scalar predicate filters input; an empty
+`std::function` disables it. LineEdit uses this predicate as `accept_character`;
+clear it with `accept_character = {}`. See [filtering and submission](../widgets.md#text-editing)
+for widget-level validation.
 
 `text_scroll` keeps the caret visible and snaps scrolling to complete grapheme
 boundaries. Short right-aligned text shifts left one cell when necessary to display
@@ -258,11 +258,6 @@ the caret. Painting does not edit the document or emit notifications. `on_scroll
 reports changed offset, content size, or viewport size, including geometry changes.
 See [Link scrolling](../layout.md#scrolling) for the shared connection contract.
 
-The application binds a streaming paste to the widget that handles its first chunk.
-Changing focus does not redirect the rest. Removal or disabling drops the remaining
-stream; a new paste or a text reset discards the retained partial buffer. A reset
-cannot cause an orphan final chunk to be inserted.
-
-Headless tests cover normalization, controls, combining sequences, emoji, selection
-and grapheme joining, bounded history, paste transactions, wrapping, byte/cell mapping,
-width-policy ownership, vertical navigation, cache reuse, and extreme coordinates.
+[Paste routing](routing-and-focus.md#responses-and-propagation) keeps a stream bound
+to its original handler. A new paste or text reset discards the retained partial
+buffer; a reset cannot cause an orphan final chunk to be inserted.
