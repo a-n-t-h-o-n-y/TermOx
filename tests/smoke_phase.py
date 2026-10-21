@@ -1,4 +1,6 @@
 """Check Phase's scenes, then exercise tabs and controls through a POSIX PTY."""
+import csv
+import io
 import json
 from pathlib import Path
 import subprocess
@@ -18,10 +20,19 @@ def main():
         content = frame['rows'][1:-3]
         colors = {cell['fg'] for row in content for cell in row if cell['text'].strip()}
         assert len(colors) > 12, f'scene {scene} has no rendered simulation'
+    for scene in range(4):
+        output = subprocess.check_output(
+            [str(executable), '--benchmark', '--scene', str(scene), '--frames', '2',
+             '--width', '800', '--height', '240'], text=True)
+        row, = csv.DictReader(io.StringIO(output))
+        assert int(row['frames']) == 2 and int(row['bytes_per_frame']) > 0
+        assert all(float(row[key]) >= 0 for key in ('simulation_ms', 'paint_ms', 'encode_ms'))
     # SGR mouse clicks select each tab; controls keep working after pointer capture,
     # focus changes, wheel input, keyboard tab switching, and terminal resizes.
     output = smoke(executable, [
         b' ', b'.', b'r', b' ',
+        b'\x1b[<2;60;15M', b'\x1b[<34;68;18M', b'\x1b[<2;68;18m',
+        b'\x1b[<64;68;18M', b'\x1b[<65;68;18M', b'\x1b[H',
         b'\x1b[<0;12;12M', b'\x1b[<32;24;16M', b'\x1b[<0;24;16m',
         b'\x1b[<0;11;1M', b'\x1b[<0;11;1m',  # Bloom
         b'\x1b[<0;30;12M', b'\x1b[<32;40;15M', b'\x1b[<0;40;15m',

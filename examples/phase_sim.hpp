@@ -23,6 +23,33 @@ inline auto unit(Vec v) -> Vec { return v / std::max(1e-9, v.length()); }
 inline auto limit(Vec v, double speed) -> Vec
 { return v * std::min(1., speed / std::max(1e-9, v.length())); }
 inline auto finite(Vec v) -> bool { return std::isfinite(v.x) && std::isfinite(v.y); }
+// Liang–Barsky clipping bounds raster work, including captured drags offscreen.
+inline auto clip_line(Vec& a,
+                      Vec& b,
+                      double left,
+                      double right,
+                      double top,
+                      double bottom) -> bool
+{
+    if (!finite(a) || !finite(b) || left > right || top > bottom) return false;
+    Vec d = b - a;
+    double lo = 0, hi = 1;
+    auto clip = [&](double p, double q) {
+        if (p == 0) return q >= 0;
+        double r = q / p;
+        if (p < 0)
+            lo = std::max(lo, r);
+        else
+            hi = std::min(hi, r);
+        return lo <= hi;
+    };
+    if (!clip(-d.x, a.x - left) || !clip(d.x, right - a.x) || !clip(-d.y, a.y - top) ||
+        !clip(d.y, bottom - a.y))
+        return false;
+    b = a + d * hi;
+    a = a + d * lo;
+    return true;
+}
 struct Light {
     double r = 0, g = 0, b = 0;
     auto operator+(Light v) const -> Light { return {r + v.r, g + v.g, b + v.b}; }

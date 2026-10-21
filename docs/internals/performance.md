@@ -117,3 +117,16 @@ It compares polling and readiness waiting in an 80×24 PTY, with five alternatin
 samples per mode. CSV output reports idle iterations per second and posted-event
 dispatch latency in microseconds; medians go to stderr. It also checks terminal
 mode restoration. Latency depends on OS scheduling and does not measure frame rate.
+
+## Phase at large sizes
+
+```sh
+cmake --build build-release --target TermOx.examples.phase -j 4
+./build-release/examples/TermOx.examples.phase --benchmark --scene 0 \
+    --width 480 --height 160 --frames 120
+```
+
+Scenes 0–3 are Orbit, Bloom, Loom, and Flock. After 30 warmup frames, CSV output
+reports average simulation, painting, and encoding time in milliseconds, plus
+output bytes per frame. Terminal I/O is excluded; large animated canvases can be
+limited by the emulator and output bandwidth.
