@@ -4,35 +4,44 @@
 
 using namespace ox;
 
-/**
- * Create a Button with an integer display and a fade decoration.
- */
-[[nodiscard]] auto int_button(int n) -> Button
-{
-    return {{
-        .label =
-            {
-                .text = std::to_string(n),
-                .style = {.foreground = colors::bright_black, .traits = Trait::None},
-            },
-        .decoration =
-            Fade{
-                .paint_fn = shape_gradient(shape::Box::brackets_round(), RGB{0x0a3f46},
-                                           RGB{0x1ecbe1}),
-                .fade_in = std::chrono::milliseconds{300},
-                .fade_out = std::chrono::milliseconds{500},
-            },
-        .pressed_style = {.background = {},
-                          .foreground = colors::bright_white,
-                          .enabled = {},
-                          .disabled = {}},
-        .focused_style = {.background = {},
-                          .foreground = colors::bright_cyan,
-                          .enabled = {},
-                          .disabled = {}},
-        .height_policy = SizePolicy::flex(),
-    }};
-}
+class NumberButton : public Button {
+   public:
+    explicit NumberButton(int n)
+        : Button{{
+              .label = {.text = std::to_string(n),
+                        .style = {.foreground = colors::bright_black,
+                                  .traits = Trait::None}},
+              .pressed_style = {.foreground = colors::bright_white},
+              .focused_style = {.foreground = colors::bright_cyan},
+              .height_policy = SizePolicy::flex(),
+          }}
+    {}
+
+    auto paint(Canvas canvas) -> Cursor override
+    {
+        auto cursor = Button::paint(canvas);
+        put(canvas, shape::Box::brackets_round(),
+            gradient_blend(RGB{0x0a3f46}, RGB{0x1ecbe1}, (float)hover_.value()));
+        return cursor;
+    }
+
+    auto mouse_enter() -> EventResponse override
+    {
+        auto response = Button::mouse_enter();
+        hover_.to(1., {std::chrono::milliseconds{300}, Ease::OutCubic});
+        return response;
+    }
+
+    auto mouse_leave() -> EventResponse override
+    {
+        auto response = Button::mouse_leave();
+        hover_.to(0., {std::chrono::milliseconds{500}, Ease::OutCubic});
+        return response;
+    }
+
+   private:
+    Animation hover_{*this};
+};
 
 template <typename WidgetType>
 using Grid = Column<std::vector<Row<std::vector<WidgetType>>>>;
@@ -40,7 +49,7 @@ using Grid = Column<std::vector<Row<std::vector<WidgetType>>>>;
 /**
  * A grid of buttons that emit their integer when pressed.
  */
-class NumberPad : public Grid<Button> {
+class NumberPad : public Grid<NumberButton> {
    public:
     sl::Signal<void(int)> on_activate;
 
@@ -51,7 +60,7 @@ class NumberPad : public Grid<Button> {
         for (auto y = 0; y < height; ++y) {
             auto& row = this->children.emplace_back();
             for (auto x = 0; x < width; ++x) {
-                auto& child = row.children.emplace_back(int_button(i));
+                auto& child = row.children.emplace_back(i);
                 Connection{.signal = child.on_activate,
                            .slot = [i](auto& parent) { parent.on_activate(i); }}(*this);
                 i += i;
