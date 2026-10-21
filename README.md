@@ -52,3 +52,5 @@ Ctrl-C exits.
 
 See [Contributing](docs/contributing.md) for build and test instructions.
 TermOx is released under the [MIT license](LICENSE).
+
+[![Flock simulation in Phase](docs/img/phase-flock.png)](examples/phase.cpp)
