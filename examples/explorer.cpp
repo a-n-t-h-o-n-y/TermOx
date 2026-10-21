@@ -10,6 +10,16 @@ using namespace std::chrono_literals;
 namespace {
 // A built-in one-child layout lets SplitPane borrow a named widget.
 auto view(Widget& child) { return Column{std::tie(child)}; }
+// Scrolling panes use the remaining space, regardless of their content's height.
+class BrowserViewport : public Column<std::tuple<Widget&>> {
+   public:
+    explicit BrowserViewport(Widget& child) : Column{std::tie(child)} {}
+    auto measure(Area available, esc::WidthPolicy = {}) const -> Area override
+    {
+        validate(available);
+        return {};
+    }
+};
 auto label(std::string text) {
     return Label{{.text = std::move(text), .align = Align::Start}};
 }
@@ -143,6 +153,7 @@ try {
     auto body = SplitPane{view(folder_frame), view(files_and_preview), .20};
     body.width_policy = SizePolicy::flex();
     body.height_policy = SizePolicy::flex();
+    auto browser_viewport = BrowserViewport{body};
     auto status = label("Loading…");
     auto palette = CommandPalette{};
     auto command_dialog = Dialog{view(palette), "Commands"};
@@ -195,7 +206,7 @@ try {
     help.height_policy = SizePolicy::fixed(1);
     palette.set_commands({parent_command, refresh_command, path_command, filter_command,
                           preview_command, hidden_command, dark, light, terminal, quit});
-    auto content = Column{std::tie(location, menu, search, body, status, help, command_dialog)};
+    auto content = Column{std::tie(location, menu, search, browser_viewport, status, help, command_dialog)};
     auto root = Padding{std::move(content), std::array{1, 1, 1, 1}};
     auto app = Application{root};
     auto focus = [&](Widget& target) {

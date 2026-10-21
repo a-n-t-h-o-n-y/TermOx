@@ -53,6 +53,18 @@ with tempfile.TemporaryDirectory(prefix="termox-explorer-") as temporary:
     assert "640 x 400" in text and "▄" in text, text
     assert any(cell["bg"] != cell["fg"] and cell["text"] == "▄"
                for row in data["rows"] for cell in row)
+
+    # Scrollable content must not displace the surrounding controls.
+    (root / "long.txt").write_text("A preview line\n" * 1000)
+    for width, height in [(120, 32), (80, 16)]:
+        for selected in ["readme.txt", "long.txt", "image.bmp"]:
+            _, text = frame("--select", selected, "--width", str(width), "--height", str(height))
+            lines = text.splitlines()
+            assert "File" in lines[2] and "View" in lines[2], text
+            assert "Filter names" in lines[3], text
+            assert "Folders" in lines[4] and "Files" in lines[4], text
+            assert "entries" in lines[-3] or "640 x 400" in lines[-3], text
+            assert "ctrl+l" in lines[-2], text
     frame("--width", "0", "--height", "0")
     frame("--width", "24", "--height", "8", "--theme", "terminal")
     bad = subprocess.run([str(executable), str(root / "missing"), "--json"],
