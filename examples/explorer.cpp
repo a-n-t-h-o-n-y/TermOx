@@ -10,6 +10,39 @@ using namespace std::chrono_literals;
 namespace {
 // A built-in one-child layout lets SplitPane borrow a named widget.
 auto view(Widget& child) { return Column{std::tie(child)}; }
+using BorrowedPane = Column<std::tuple<Widget&>>;
+class PaneDivider : public SplitPane<BorrowedPane, BorrowedPane> {
+    using Base = SplitPane<BorrowedPane, BorrowedPane>;
+    bool hovered_ = false;
+   public:
+    using Base::Base;
+    using Base::handle;
+    auto paint(Canvas canvas) -> Cursor override
+    {
+        style.foreground = hovered_ || is_pointer_captured() || is_focused()
+            ? theme().palette.accent : theme().palette.border;
+        return Base::paint(canvas);
+    }
+    auto handle(MouseMove const& event) -> EventResponse override
+    {
+        auto hovered = contains({{}, size()}, event.at) &&
+            (vertical ? event.at.y == second.bounds().at.y - 1
+                      : event.at.x == second.bounds().at.x - 1);
+        auto changed = std::exchange(hovered_, hovered) != hovered;
+        return combine(Base::handle(event), {.repaint = changed});
+    }
+    auto mouse_leave() -> EventResponse override
+    { return {.repaint = std::exchange(hovered_, false)}; }
+};
+class QuietScrollBar : public ScrollBar {
+   public:
+    using ScrollBar::ScrollBar;
+    auto paint(Canvas canvas) -> Cursor override
+    {
+        if (content_length() <= viewport_length()) return {};
+        return ScrollBar::paint(canvas);
+    }
+};
 // Scrolling panes use the remaining space, regardless of their content's height.
 class BrowserViewport : public Column<std::tuple<Widget&>> {
    public:
@@ -99,6 +132,7 @@ try {
         throw std::invalid_argument{"Theme must be dark, light, or terminal"};
 
     auto path = LineEdit{{.placeholder = "Directory path — Enter to open"}};
+    auto path_field = BrowserViewport{path};
     auto up = Button{{.label = {.text = "Up"}}};
     auto reload = Button{{.label = {.text = "Refresh"}}};
     auto heading = label("Explorer");
@@ -106,55 +140,74 @@ try {
     heading.width_policy = SizePolicy::fixed(10);
     up.width_policy = SizePolicy::fixed(6);
     reload.width_policy = SizePolicy::fixed(11);
-    auto location = Row{std::tie(heading, up, path, reload)};
+    auto path_label = label("Path");
+    path_label.width_policy = SizePolicy::fixed(7);
+    path_label.role = Surface::Muted;
+    auto location = Row{std::tie(path_label, path_field, up, reload)};
     location.gap = 1;
     location.height_policy = SizePolicy::fixed(1);
 
-    auto filter = LineEdit{{.text = initial_filter, .placeholder = "Filter names"}};
+    auto filter = LineEdit{{.text = initial_filter}};
+    filter.width_policy = SizePolicy::bounded(12, 28);
+    auto filter_label = label("Filter");
+    filter_label.width_policy = SizePolicy::fixed(7);
+    filter_label.role = Surface::Muted;
+    auto search_space = Widget{};
     auto hidden = CheckBox{{.label = {.text = "Hidden files"}}};
     auto preview_toggle = CheckBox{{.checked = true, .label = {.text = "Preview"}}};
     hidden.width_policy = SizePolicy::fixed(18);
     preview_toggle.width_policy = SizePolicy::fixed(14);
-    auto search = Row{std::tie(filter, hidden, preview_toggle)};
+    auto search = Row{std::tie(filter_label, filter, search_space, hidden, preview_toggle)};
     search.gap = 1;
     search.height_policy = SizePolicy::fixed(1);
 
     auto folders = TreeView{};
-    auto folder_bar = ScrollBar{};
+    auto folder_bar = QuietScrollBar{};
     auto folder_rows = Row{std::tie(folders, folder_bar)};
-    auto folder_frame = view(folder_rows) | Border{.label = {.text = "Folders"}};
+    auto folder_content = BrowserViewport{folder_rows};
+    auto folder_title = label("Folders");
+    folder_title.role = Surface::Muted;
+    auto folder_frame = Padding{Column{std::tie(folder_title, folder_content)}, std::array{0, 1, 1, 1}};
     link(folders, folder_bar);
     auto table = DataTable{{
         .columns = {{.heading = "Name", .size = SizePolicy::min(16)},
                     {.heading = "Bytes", .size = SizePolicy::fixed(12), .align = Align::End},
                     {.heading = "Type", .size = SizePolicy::fixed(14)},
                     {.heading = "Modified (UTC)", .size = SizePolicy::fixed(18)}},
-        .striped = true, .hover_rows = true, .empty_text = "Loading…"}};
-    auto table_bar = ScrollBar{};
+        .striped = true, .hover_rows = true, .column_lines = false, .empty_text = "Loading…"}};
+    auto table_bar = QuietScrollBar{};
     auto table_rows = Row{std::tie(table, table_bar)};
-    auto table_horizontal = ScrollBar{{.vertical = false}};
-    auto table_area = Column{std::tie(table_rows, table_horizontal)};
+    auto table_content = BrowserViewport{table_rows};
+    auto table_horizontal = QuietScrollBar{{.vertical = false}};
+    auto table_area = Column{std::tie(table_content, table_horizontal)};
     link(table, table_horizontal);
-    auto table_frame = view(table_area) | Border{.label = {.text = "Files"}};
+    auto table_title = label("Files");
+    table_title.role = Surface::Muted;
+    auto table_frame = Padding{Column{std::tie(table_title, table_area)}, std::array{0, 1, 0, 1}};
     link(table, table_bar);
     auto preview_text = TextBox{{.text = "Select a file to preview.", .read_only = true}};
     auto image = example::BmpImage{};
     auto preview_pages = Stack{std::tie(preview_text, image)};
+    auto preview_content = BrowserViewport{preview_pages};
     auto fit = Button{{.label = {.text = "Fit"}}};
     auto actual = Button{{.label = {.text = "100%"}}};
     auto smaller = Button{{.label = {.text = "−"}}};
     auto larger = Button{{.label = {.text = "+"}}};
     auto image_tools = Row{std::tie(fit, actual, smaller, larger)};
+    image_tools.gap = 1;
     image_tools.height_policy = SizePolicy::fixed(1);
     image_tools.visible = false;
-    auto preview_body = Column{std::tie(image_tools, preview_pages)};
-    auto preview_frame = view(preview_body) | Border{.label = {.text = "Preview"}};
-    auto files_and_preview = SplitPane{view(table_frame), view(preview_frame), .62};
-    auto body = SplitPane{view(folder_frame), view(files_and_preview), .20};
+    auto preview_title = label("Preview");
+    preview_title.role = Surface::Muted;
+    auto preview_body = Column{std::tie(preview_title, image_tools, preview_content)};
+    auto preview_frame = Padding{view(preview_body), std::array{0, 1, 1, 1}};
+    auto files_and_preview = PaneDivider{view(table_frame), view(preview_frame), .62};
+    auto body = PaneDivider{view(folder_frame), view(files_and_preview), .20};
     body.width_policy = SizePolicy::flex();
     body.height_policy = SizePolicy::flex();
     auto browser_viewport = BrowserViewport{body};
     auto status = label("Loading…");
+    status.role = Surface::Muted;
     auto palette = CommandPalette{};
     auto command_dialog = Dialog{view(palette), "Commands"};
     command_dialog.requested_size = Area{52, 14};
@@ -201,12 +254,18 @@ try {
     auto menu = MenuBar{{{"File", {{parent_command}, {refresh_command}, {path_command}, {quit}}},
                          {"View", {{preview_command}, {hidden_command}, {dark}, {light}, {terminal}}}}};
     menu.height_policy = SizePolicy::fixed(1);
+    auto menu_row = Row{std::tie(heading, menu)};
+    menu_row.gap = 2;
+    auto header = Padding{std::move(menu_row), std::array{0, 0, 1, 0}};
+    header.height_policy = SizePolicy::fixed(2);
+    auto controls = Padding{Column{std::tie(location, search)}, std::array{0, 0, 1, 0}};
+    controls.height_policy = SizePolicy::fixed(3);
     auto help = KeyHelp{{path_command, filter_command, parent_command, refresh_command,
                          preview_command, commands_command}};
     help.height_policy = SizePolicy::fixed(1);
     palette.set_commands({parent_command, refresh_command, path_command, filter_command,
                           preview_command, hidden_command, dark, light, terminal, quit});
-    auto content = Column{std::tie(location, menu, search, browser_viewport, status, help, command_dialog)};
+    auto content = Column{std::tie(header, controls, browser_viewport, status, help, command_dialog)};
     auto root = Padding{std::move(content), std::array{1, 1, 1, 1}};
     auto app = Application{root};
     auto focus = [&](Widget& target) {
@@ -222,6 +281,19 @@ try {
     set_theme = [&](int index) {
         auto theme = index == 0 ? Theme::dark() : index == 1 ? Theme::light() : Theme::terminal();
         theme.motion.enabled = false;
+        theme.palette.border = mix_color(theme.palette.background, theme.palette.muted, .38);
+        for (auto* title : {&folder_title, &table_title, &preview_title}) {
+            title->style.background = theme.palette.surface;
+            title->style.foreground = mix_color(theme.palette.muted, theme.palette.accent, .65);
+        }
+        for (auto* bar : {&folder_bar, &table_bar, &table_horizontal}) {
+            bar->track_style.foreground = theme.palette.background;
+            bar->thumb_style.foreground = theme.palette.border;
+        }
+        preview_text.style.background = theme.palette.background;
+        table.cell_style = [muted = theme.palette.muted](std::size_t, std::size_t column) {
+            return column ? StylePatch{.foreground = muted} : StylePatch{};
+        };
         app.set_theme(theme);
     };
     set_theme(theme_name == "dark" ? 0 : theme_name == "light" ? 1 : 2);
@@ -238,8 +310,7 @@ try {
     preview = [&] {
         auto ticket = ++generation;
         pending_preview = false;
-        preview_frame.border.label.text = selected ? explorer::display(selected->filename().string()) : "Preview";
-        preview_frame.refresh();
+        preview_title.set_text(selected ? explorer::display(selected->filename().string()) : "Preview");
         if (!selected || !preview_toggle.checked()) { show_text("Select a file to preview."); return; }
         auto file = *selected;
         auto entry = std::find_if(directory.entries.begin(), directory.entries.end(),
@@ -285,8 +356,7 @@ try {
         table.empty_text = directory.entries.empty() ? "Empty directory" : "No matching files";
         table.set_rows(std::move(data));
         constexpr std::array headings{"Name", "Bytes", "Type", "Modified"};
-        table_frame.border.label.text = std::string{"Files — "} + headings[sort_column] + (ascending ? " ↑" : " ↓");
-        table_frame.refresh();
+        table_title.set_text(std::string{"Files · "} + headings[sort_column] + (ascending ? " ↑" : " ↓"));
         if (!restore && !rows.empty()) restore = 0;
         if (restore) {
             selected = directory.entries[rows[*restore]].path;

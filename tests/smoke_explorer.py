@@ -60,9 +60,12 @@ with tempfile.TemporaryDirectory(prefix="termox-explorer-") as temporary:
         for selected in ["readme.txt", "long.txt", "image.bmp"]:
             _, text = frame("--select", selected, "--width", str(width), "--height", str(height))
             lines = text.splitlines()
-            assert "File" in lines[2] and "View" in lines[2], text
-            assert "Filter names" in lines[3], text
-            assert "Folders" in lines[4] and "Files" in lines[4], text
+            assert "File" in lines[1] and "View" in lines[1], text
+            assert not lines[2].strip(), text
+            assert "Path" in lines[3] and "Up" in lines[3] and "Refresh" in lines[3], text
+            assert "Filter" in lines[4] and "Hidden files" in lines[4], text
+            assert not lines[5].strip(), text
+            assert "Folders" in lines[6] and "Files" in lines[6], text
             assert "entries" in lines[-3] or "640 x 400" in lines[-3], text
             assert "ctrl+l" in lines[-2], text
     frame("--width", "0", "--height", "0")

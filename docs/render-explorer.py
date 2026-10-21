@@ -48,8 +48,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', type=Path)
     parser.add_argument('--executable', default='build/examples/TermOx.examples.explorer')
-    parser.add_argument('--width', type=int, default=110)
-    parser.add_argument('--height', type=int, default=30)
+    parser.add_argument('--width', type=int, default=140)
+    parser.add_argument('--height', type=int, default=38)
     parser.add_argument('--title', default='TermOx Explorer')
     args = parser.parse_args()
     # A small, disposable dataset keeps the README independent of the developer's files.
