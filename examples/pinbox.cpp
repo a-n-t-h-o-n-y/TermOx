@@ -1,3 +1,4 @@
+#include <array>
 #include <iostream>
 #include <map>
 #include <string>
@@ -80,30 +81,92 @@ class PinBox : public Widget {
     Color current_color_ = colors::bright_blue;
 };
 
-using ColorRow = Row<std::vector<Button>>;
-class ColorSelect : public Column<std::vector<ColorRow>> {
+class ColorSelect : public Widget {
    public:
+    using Widget::handle;
     sl::Signal<void(Color)> on_select;
 
-   public:
-    ColorSelect(std::vector<Color> colors = {})
+    ColorSelect() : Widget{FocusPolicy::Strong, SizePolicy::flex(), SizePolicy::fixed(5)} {}
+
+    auto paint(Canvas canvas) -> Cursor override
     {
-        height_policy = SizePolicy::fixed(2);
-        for (auto const color : colors) {
-            if (children.empty() || children.back().children.size() == 4) {
-                children.emplace_back();
-                children.back().height_policy = SizePolicy::fixed(1);
+        for (int i = 0; i < 8; ++i) {
+            auto const bounds = swatch(i);
+            auto tile = canvas.subcanvas(bounds.at, bounds.size);
+            auto const style = Style{.background = palette_[i].color,
+                                     .foreground = palette_[i].ink};
+            paint_label(tile.subcanvas({1, 0}, {std::max(0, bounds.size.width - 2), 1}),
+                        i == selected_ ? "✓" : "", Align::Center, style);
+            if (is_focused() && i == current_ && bounds.size.width >= 3) {
+                put(tile, {0, 0}, U'[');
+                put(tile, {bounds.size.width - 1, 0}, U']');
             }
-            auto& row = children.back();
-            row.children.push_back({{.label = {.text = "  ",
-                                           .style = {.background = color}},
-                                 .decoration = [color](Canvas canvas) {
-                                     fill(canvas, Style{.background = color});
-                                 }}});
-            Connection{
-                .signal = row.children.back().on_activate,
-                .slot = [color](auto& parent) { parent.on_select(color); }}(*this);
         }
+        put_label(canvas.subcanvas({0, 4}, {canvas.size().width, 1}),
+                  palette_[selected_].name, Align::Center, {});
+        return {};
+    }
+
+    auto handle(KeyEvent const& event) -> EventResponse override
+    {
+        if (event.action == KeyAction::Release) return {};
+        if (activates(event)) return select();
+        auto next = current_;
+        if (event.matches(KeyCode::ArrowLeft, {}, event.action)) {
+            if (next % 4 != 0) --next;
+        }
+        else if (event.matches(KeyCode::ArrowRight, {}, event.action)) {
+            if (next % 4 != 3) ++next;
+        }
+        else if (event.matches(KeyCode::ArrowUp, {}, event.action)) next = next % 4;
+        else if (event.matches(KeyCode::ArrowDown, {}, event.action)) next = next % 4 + 4;
+        else return {};
+        auto const changed = next != current_;
+        current_ = next;
+        return {.handled = true, .repaint = changed};
+    }
+
+    auto handle(MousePress const& event) -> EventResponse override
+    {
+        if (event.button != MouseButton::Left) return {};
+        for (int i = 0; i < 8; ++i) {
+            if (contains(swatch(i), event.at)) {
+                current_ = i;
+                return select();
+            }
+        }
+        return {};
+    }
+
+   private:
+    struct Swatch { Color color; Color ink; std::string_view name; };
+    std::array<Swatch, 8> palette_{{
+        {colors::bright_blue, colors::black, "Bright blue"},
+        {colors::blue, colors::bright_white, "Blue"},
+        {colors::bright_red, colors::black, "Bright red"},
+        {colors::red, colors::bright_white, "Red"},
+        {colors::bright_green, colors::black, "Bright green"},
+        {colors::green, colors::black, "Green"},
+        {colors::white, colors::black, "White"},
+        {colors::bright_black, colors::bright_white, "Gray"},
+    }};
+    int selected_ = 0;
+    int current_ = 0;
+
+    auto swatch(int index) const -> Rect
+    {
+        auto const column = index % 4;
+        auto const left = column * size().width / 4;
+        auto const right = (column + 1) * size().width / 4;
+        return {{left, (index / 4) * 2}, {right - left, 1}};
+    }
+
+    auto select() -> EventResponse
+    {
+        selected_ = current_;
+        request_repaint();
+        on_select(palette_[selected_].color);
+        return {.handled = true, .repaint = true};
     }
 };
 
@@ -121,20 +184,11 @@ int main(int argc, char** argv)
 
             Column{
                 Label{{
-                    .text = "Color Select",
+                    .text = "Color",
                     .align = Align::Center,
                     .style = {.traits = Trait::Bold},
                 }},
-                ColorSelect{{
-                    colors::bright_blue,
-                    colors::blue,
-                    colors::bright_red,
-                    colors::red,
-                    colors::bright_green,
-                    colors::green,
-                    colors::white,
-                    colors::bright_black,
-                }},
+                ColorSelect{},
                 Divider{{
                     .lines = Lines::bold(),
                     .style = {.foreground = colors::bright_black},
@@ -185,7 +239,7 @@ int main(int argc, char** argv)
 
     auto& [pinbox, div, sidebar] = head.child.children;
 
-    sidebar.width_policy = SizePolicy::fixed(22);
+    sidebar.width_policy = SizePolicy::fixed(20);
     get_child<6>(sidebar).height_policy = SizePolicy::fixed(1);
     auto& color_select = get_child<1>(sidebar);
     auto& status = get_child<4>(sidebar);
@@ -234,15 +288,19 @@ int main(int argc, char** argv)
             }
             return false;
         };
-        if (!has_text(U"Color Select") || !has_text(U"Last Action") ||
+        if (!has_text(U"Color") || !has_text(U"Last Action") ||
             !has_text(U"Pin Count")) return 7;
-        for (auto& row : color_select.children)
-            for (auto& button : row.children) {
-                auto frame = Frame{button.size()};
-                button.paint(Canvas{frame});
-                if (frame[{0, 0}].style.background != button.label.style.background)
-                    return 3;
-            }
+        if (!has_text(U"Bright blue") || !has_text(U"✓")) return 3;
+        app.set_focus(color_select);
+        app.dispatch(KeyEvent{.key = KeyCode::ArrowRight});
+        app.paint();
+        if (!has_text(U"Bright blue")) return 9; // Focus alone keeps the selection.
+        app.dispatch(KeyEvent{.key = KeyCode::Enter});
+        app.paint();
+        if (!has_text(U"Blue") || has_text(U"Bright blue")) return 10;
+        color_select.handle(MousePress{.at = {12, 2}, .button = MouseButton::Left});
+        app.paint();
+        if (!has_text(U"White")) return 11;
         pinbox.handle(MousePress{.at = {3, 4}, .button = MouseButton::Left});
         if (status.text != "Added (3, 4)" || count.value != 1) return 4;
         pinbox.handle(MousePress{.at = {3, 4}, .button = MouseButton::Right});

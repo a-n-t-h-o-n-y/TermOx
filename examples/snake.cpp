@@ -246,8 +246,10 @@ int main()
             },
             {.width = 14, .height = 1},
             {U' ' | score_style},
-        } | SizePolicy::fixed(1),
+        },
     };
+
+    get_child<1>(head).height_policy = SizePolicy::fixed(1);
 
     Connection{.signal = get_child(get_child<0>(head)).score_update,
                .slot = [](int score, auto& int_label) { int_label.value = score; }}(
